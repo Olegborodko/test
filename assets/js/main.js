@@ -92,6 +92,29 @@ const partnerInputs = hasDom ? [...document.querySelectorAll('[name^="partner"]'
 const tabs = hasDom ? document.querySelectorAll('.tab') : [];
 const chartOnlyBlocks = hasDom ? document.querySelectorAll('[data-chart-only]') : [];
 
+const pageTitle = hasDom ? document.querySelector('.page__header h1') : null;
+const pageLead = hasDom ? document.querySelector('.page__header .page__lead') : null;
+
+// Each tab explains itself: what this page is for and why to fill the form.
+const PAGE_COPY = {
+  chart: {
+    title: 'Натальная карта',
+    lead: 'Западная и ведическая карта по дате, времени и месту рождения. Показывает характер, сильные стороны и в чём стоит быть внимательнее.',
+  },
+  forecast: {
+    title: 'Прогноз',
+    lead: 'Что происходит в жизни сейчас. Сравнивает вашу карту с нынешним положением планет — на неделю, месяц или год вперёд.',
+  },
+  synastry: {
+    title: 'Совместимость',
+    lead: 'Насколько два человека подходят друг другу: сравнивает две карты, находит общие точки и считает процент совпадения.',
+  },
+  solar: {
+    title: 'Соляр',
+    lead: 'Тема года вперёд: карта на момент, когда Солнце возвращается в ту точку, где было при рождении, — это происходит в день рождения.',
+  },
+};
+
 let mode = 'chart';
 
 function setMode(next) {
@@ -101,6 +124,9 @@ function setMode(next) {
     tab.classList.toggle('tab--active', active);
     tab.setAttribute('aria-selected', String(active));
   }
+  const copy = PAGE_COPY[next] || PAGE_COPY.chart;
+  if (pageTitle) pageTitle.textContent = copy.title;
+  if (pageLead) pageLead.textContent = copy.lead;
   if (periodField) periodField.hidden = next !== 'forecast';
   if (partnerField) partnerField.hidden = next !== 'synastry';
   if (solarField) solarField.hidden = next !== 'solar';
