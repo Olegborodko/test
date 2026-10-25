@@ -33,9 +33,11 @@ function localParts(instant, timeZone) {
 
 /**
  * The solar return is the moment the Sun comes back to its natal longitude. The
- * chart for that moment is read as the forecast for the year ahead.
+ * chart for that moment is read as the forecast for the year ahead. The natal
+ * chart uses the birth place; the return itself is cast for the place where the
+ * person will be that day, when it is known.
  */
-export async function computeSolarReturn({ birth, asteroids = false, after = new Date() }) {
+export async function computeSolarReturn({ birth, place = null, asteroids = false, after = new Date() }) {
   const { swe } = await getEngine();
 
   const natal = await computeChart(birth);
@@ -43,14 +45,19 @@ export async function computeSolarReturn({ birth, asteroids = false, after = new
   const { jd } = swe.solarReturn(natal.julianDay, { after: afterJd });
 
   const instant = instantFromJulianDay(jd);
-  const local = localParts(instant, birth.timeZone);
+  const where = place || {
+    latitude: birth.latitude,
+    longitude: birth.longitude,
+    timeZone: birth.timeZone,
+  };
+  const local = localParts(instant, where.timeZone);
 
   const chart = await computeChart({
     date: local.date,
     time: local.preciseTime,
-    timeZone: birth.timeZone,
-    latitude: birth.latitude,
-    longitude: birth.longitude,
+    timeZone: where.timeZone,
+    latitude: where.latitude,
+    longitude: where.longitude,
     asteroids,
   });
 

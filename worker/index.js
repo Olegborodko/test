@@ -171,10 +171,18 @@ async function handleSolar(request, env) {
   const location = await resolveLocation(body);
   if (location.error) return json({ error: location.error }, location.status);
 
+  // The return itself is cast for the city the person will be in that day.
+  let returnLocation = null;
+  if (String(body.returnCity || '').trim()) {
+    returnLocation = await resolveLocation({ city: body.returnCity });
+    if (returnLocation.error) return json({ error: returnLocation.error }, returnLocation.status);
+  }
+
   try {
     await loadPrecisionFiles(env.ASSETS);
     const result = await computeSolarReturn({
       birth: { ...birth, ...location },
+      place: returnLocation,
       asteroids: body.asteroids === true && isPrecisionReady(),
     });
     const chart = result.chart;
@@ -184,11 +192,13 @@ async function handleSolar(request, env) {
     });
 
     return json({
-      place: location.place,
+      place: returnLocation ? returnLocation.place : location.place,
       system: 'western',
       returnedAt: result.returnedAt,
       local: result.local,
-      note: 'Карта построена на город рождения. Если в день рождения вы будете в другом городе, тема года сдвинется.',
+      note: returnLocation
+        ? 'Карта построена на город, который вы указали для дня рождения.'
+        : 'Карта построена на город рождения. Если в этот день вы будете в другом городе, впишите его — дома и восход сдвинутся.',
       input: chart.input,
       utc: chart.utc,
       julianDay: chart.julianDay,

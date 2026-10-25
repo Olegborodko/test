@@ -87,6 +87,7 @@ const submitButton = hasDom ? form.querySelector('button[type="submit"]') : null
 const periodField = hasDom ? document.getElementById('period-field') : null;
 const systemField = hasDom ? document.getElementById('system-field') : null;
 const partnerField = hasDom ? document.getElementById('partner-field') : null;
+const solarField = hasDom ? document.getElementById('solar-field') : null;
 const partnerInputs = hasDom ? [...document.querySelectorAll('[name^="partner"]')] : [];
 const tabs = hasDom ? document.querySelectorAll('.tab') : [];
 
@@ -101,6 +102,7 @@ function setMode(next) {
   }
   if (periodField) periodField.hidden = next !== 'forecast';
   if (partnerField) partnerField.hidden = next !== 'synastry';
+  if (solarField) solarField.hidden = next !== 'solar';
   if (systemField) systemField.hidden = next === 'synastry' || next === 'solar';
   for (const input of partnerInputs) input.required = next === 'synastry';
 
@@ -510,6 +512,7 @@ async function submitChart(event) {
       };
   payload.asteroids = data.get('asteroids') === 'on';
   if (mode === 'forecast') payload.period = data.get('period');
+  if (mode === 'solar') payload.returnCity = data.get('returnCity');
 
   const endpoint = {
     chart: '/api/chart',

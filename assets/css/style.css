@@ -272,6 +272,7 @@ h2 {
 }
 
 .field--choice[hidden],
+.field--solar[hidden],
 .field--person[hidden] {
   display: none;
 }
