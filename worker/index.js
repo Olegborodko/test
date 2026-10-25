@@ -1,5 +1,6 @@
 import { computeChart } from './chart.js';
 import { findPlace } from './geo.js';
+import { buildReading } from './interpretation.js';
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_PATTERN = /^\d{2}:\d{2}$/;
@@ -62,7 +63,14 @@ async function handleChart(request) {
   try {
     const chart = await computeChart({ date, time, timeZone, latitude, longitude });
     const { western, vedic, ...shared } = chart;
-    return json({ place, system, ...shared, [system]: system === 'vedic' ? vedic : western });
+    const selected = system === 'vedic' ? vedic : western;
+    const reading = buildReading({
+      system,
+      planets: selected.planets,
+      ascendantSignIndex: Math.floor(selected.ascendant / 30),
+      ascendantLongitude: selected.ascendant,
+    });
+    return json({ place, system, ...shared, [system]: selected, reading });
   } catch (error) {
     return json({ error: 'calculation_failed', message: String(error && error.message) }, 500);
   }

@@ -113,6 +113,24 @@ function signNameOf(longitude) {
   return names[Math.floor(longitude / 30) % 12];
 }
 
+function renderReading(container, reading) {
+  const card = element('section', 'card');
+  card.append(element('h2', null, 'Разбор'));
+
+  for (const section of reading.sections) {
+    card.append(element('h3', 'reading__title', section.title));
+    if (section.text) card.append(element('p', 'reading__text', section.text));
+    if (section.note) card.append(element('p', 'reading__note', section.note));
+    if (section.items) {
+      const list = element('ul', 'reading__list');
+      for (const item of section.items) list.append(element('li', null, item));
+      card.append(list);
+    }
+  }
+
+  container.append(card);
+}
+
 function render(chart) {
   result.replaceChildren();
 
@@ -122,6 +140,7 @@ function render(chart) {
   header.append(element('p', 'card__meta', `Всемирное время: ${chart.utc.replace('T', ' ').slice(0, 16)} · JD ${chart.julianDay}`));
   result.append(header);
 
+  if (chart.reading) renderReading(result, chart.reading);
   if (chart.western) renderWestern(result, chart.western);
   if (chart.vedic) renderVedic(result, chart.vedic);
   result.hidden = false;

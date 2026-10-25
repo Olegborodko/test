@@ -47,6 +47,45 @@ h2 {
   font-size: 0.95rem;
 }
 
+.notice {
+  margin: 0 0 var(--space);
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--color-muted);
+  background: var(--color-surface);
+  border-left: 3px solid var(--color-accent);
+  border-radius: 8px;
+}
+
+.notice strong {
+  color: var(--color-text);
+}
+
+.reading__title {
+  margin: 16px 0 6px;
+  font-size: 1rem;
+  color: var(--color-accent);
+}
+
+.reading__text {
+  margin: 0 0 4px;
+}
+
+.reading__note {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.reading__list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.95rem;
+}
+
 .form {
   display: grid;
   gap: var(--space);

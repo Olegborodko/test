@@ -80,6 +80,19 @@ function round(value, digits) {
   return Math.round(value * factor) / factor;
 }
 
+/** Which of the twelve houses a longitude falls into, from house cusps. */
+function houseFromCusps(longitude, cusps) {
+  for (let index = 0; index < 12; index += 1) {
+    const start = cusps[index];
+    const end = cusps[(index + 1) % 12];
+    const inside = start <= end
+      ? longitude >= start && longitude < end
+      : longitude >= start || longitude < end;
+    if (inside) return index + 1;
+  }
+  return 12;
+}
+
 function describePosition(position) {
   return {
     sign: position.sign,
@@ -106,19 +119,24 @@ export async function computeChart({ date, time, timeZone, latitude, longitude }
 
   const tropicalHouses = swe.houses(jd, latitude, longitude, 'P');
 
+  const westernCusps = tropicalHouses.cusps.map((cusp) => round(cusp, 6));
+
   const western = {
     zodiac: 'tropical',
     houseSystem: 'Placidus',
     ascendant: round(tropicalHouses.ascendant, 6),
     midheaven: round(tropicalHouses.midheaven, 6),
-    cusps: tropicalHouses.cusps.map((cusp) => round(cusp, 6)),
-    planets: westernPlanets,
+    cusps: westernCusps,
+    planets: westernPlanets.map((planet) => ({
+      ...planet,
+      house: houseFromCusps(planet.longitude, westernCusps),
+    })),
   };
 
   swe.setSiderealMode(mod.Ayanamsa.Lahiri);
   const siderealFlags = mod.Flag.Speed | mod.Flag.Sidereal;
 
-  const vedicPlanets = BODIES.map(([key, name]) => {
+  let vedicPlanets = BODIES.map(([key, name]) => {
     const position = swe.calcWithSign(jd, mod.Body[name], { flags: siderealFlags });
     const withinNakshatra = position.longitude % NAKSHATRA_SPAN;
     return {
@@ -134,10 +152,11 @@ export async function computeChart({ date, time, timeZone, latitude, longitude }
 
   // Vedic charts conventionally use whole-sign houses counted from the rashi
   // that holds the ascendant.
-  const vedicHouses = vedicPlanets.map((planet) => ({
-    key: planet.key,
+  vedicPlanets = vedicPlanets.map((planet) => ({
+    ...planet,
     house: ((planet.signIndex - ascendantRashi + 12) % 12) + 1,
   }));
+  const vedicHouses = vedicPlanets.map((planet) => ({ key: planet.key, house: planet.house }));
 
   const vedic = {
     zodiac: 'sidereal',
