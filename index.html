@@ -13,6 +13,11 @@
       <p class="page__lead">Западная и ведическая карта по дате, времени и месту рождения.</p>
     </header>
 
+    <nav class="tabs" role="tablist" aria-label="Разделы">
+      <button class="tab tab--active" type="button" role="tab" aria-selected="true" data-mode="chart">Карта</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" data-mode="forecast">Прогноз</button>
+    </nav>
+
     <aside class="notice">
       <strong>Время рождения важно — но не для всего.</strong>
       Ошибка в один час сдвигает восход и дома примерно на 15° (половина знака), в два часа — на целый
@@ -46,6 +51,22 @@
         <label class="choice">
           <input class="choice__input" type="radio" name="system" value="vedic">
           <span>Ведическая</span>
+        </label>
+      </fieldset>
+
+      <fieldset class="field field--choice" id="period-field" hidden>
+        <legend class="field__label">На какой срок прогноз</legend>
+        <label class="choice">
+          <input class="choice__input" type="radio" name="period" value="week">
+          <span>Неделя</span>
+        </label>
+        <label class="choice">
+          <input class="choice__input" type="radio" name="period" value="month" checked>
+          <span>Месяц</span>
+        </label>
+        <label class="choice">
+          <input class="choice__input" type="radio" name="period" value="year">
+          <span>Год</span>
         </label>
       </fieldset>
 

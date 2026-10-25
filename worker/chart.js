@@ -1,6 +1,6 @@
 import { getEngine } from './swe.js';
 
-const BODIES = [
+export const BODIES = [
   ['sun', 'Sun'],
   ['moon', 'Moon'],
   ['mercury', 'Mercury'],
@@ -70,7 +70,7 @@ export function localToUtc(date, time, timeZone) {
   return new Date(instant);
 }
 
-function julianDayUtc(swe, utc) {
+export function julianDayUtc(swe, utc) {
   const hour = utc.getUTCHours() + utc.getUTCMinutes() / 60 + utc.getUTCSeconds() / 3600;
   return swe.julianDay(utc.getUTCFullYear(), utc.getUTCMonth() + 1, utc.getUTCDate(), hour);
 }

@@ -72,6 +72,25 @@ const form = hasDom ? document.getElementById('chart-form') : null;
 const status = hasDom ? document.getElementById('status') : null;
 const result = hasDom ? document.getElementById('result') : null;
 const submitButton = hasDom ? form.querySelector('button[type="submit"]') : null;
+const periodField = hasDom ? document.getElementById('period-field') : null;
+const tabs = hasDom ? document.querySelectorAll('.tab') : [];
+
+let mode = 'chart';
+
+function setMode(next) {
+  mode = next;
+  for (const tab of tabs) {
+    const active = tab.dataset.mode === next;
+    tab.classList.toggle('tab--active', active);
+    tab.setAttribute('aria-selected', String(active));
+  }
+  if (periodField) periodField.hidden = next !== 'forecast';
+  submitButton.textContent = next === 'forecast' ? 'Показать прогноз' : 'Рассчитать';
+  status.textContent = '';
+  result.hidden = true;
+}
+
+for (const tab of tabs) tab.addEventListener('click', () => setMode(tab.dataset.mode));
 
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -352,6 +371,42 @@ function render(chart) {
   result.hidden = false;
 }
 
+function formatDay(iso, withYear) {
+  const date = new Date(`${iso}T00:00:00Z`);
+  const options = { day: 'numeric', month: 'long', timeZone: 'UTC' };
+  if (withYear) options.year = 'numeric';
+  return new Intl.DateTimeFormat('ru-RU', options).format(date);
+}
+
+export function renderForecast(forecast) {
+  result.replaceChildren();
+  const withYear = forecast.period === 'year';
+
+  const header = element('section', 'card');
+  header.append(element('h2', null, forecast.reading.title));
+  const place = forecast.place ? `${forecast.place.name}, ${forecast.place.country}` : '';
+  header.append(element('p', 'card__meta',
+    [place, `${formatDay(forecast.from, withYear)} — ${formatDay(forecast.to, withYear)}`].filter(Boolean).join(' · ')));
+  result.append(header);
+
+  const card = element('section', 'card');
+  if (!forecast.reading.items.length) {
+    card.append(element('p', 'reading__text', 'На этот период точных аспектов нет. Попробуйте взять срок подольше.'));
+  } else {
+    const list = element('ul', 'forecast');
+    for (const item of forecast.reading.items) {
+      const row = element('li', 'forecast__item');
+      row.append(element('span', 'forecast__date', formatDay(item.date, withYear)));
+      row.append(element('span', 'forecast__text', item.text));
+      list.append(row);
+    }
+    card.append(list);
+  }
+  card.append(element('p', 'card__meta', forecast.reading.note));
+  result.append(card);
+  result.hidden = false;
+}
+
 async function submitChart(event) {
   event.preventDefault();
   submitButton.disabled = true;
@@ -365,9 +420,10 @@ async function submitChart(event) {
     city: data.get('city'),
     system: data.get('system'),
   };
+  if (mode === 'forecast') payload.period = data.get('period');
 
   try {
-    const response = await fetch('/api/chart', {
+    const response = await fetch(mode === 'forecast' ? '/api/transits' : '/api/chart', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(payload),
@@ -380,7 +436,8 @@ async function submitChart(event) {
     }
 
     status.textContent = '';
-    render(body);
+    if (mode === 'forecast') renderForecast(body);
+    else render(body);
   } catch {
     status.textContent = 'Сеть недоступна. Попробуйте ещё раз.';
   } finally {

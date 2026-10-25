@@ -191,18 +191,62 @@ const PLANET_THEMES = {
 
 // Planet names plus the cases a sentence may need: "Солнце рядом с Луной".
 const PLANET_CASES = {
-  sun: { nominative: 'Солнце', instrumental: 'Солнцем' },
-  moon: { nominative: 'Луна', instrumental: 'Луной' },
-  mercury: { nominative: 'Меркурий', instrumental: 'Меркурием' },
-  venus: { nominative: 'Венера', instrumental: 'Венерой' },
-  mars: { nominative: 'Марс', instrumental: 'Марсом' },
-  jupiter: { nominative: 'Юпитер', instrumental: 'Юпитером' },
-  saturn: { nominative: 'Сатурн', instrumental: 'Сатурном' },
-  uranus: { nominative: 'Уран', instrumental: 'Ураном' },
-  neptune: { nominative: 'Нептун', instrumental: 'Нептуном' },
-  pluto: { nominative: 'Плутон', instrumental: 'Плутоном' },
-  rahu: { nominative: 'Раху', instrumental: 'Раху' },
+  sun: { nominative: 'Солнце', dative: 'Солнцу', instrumental: 'Солнцем' },
+  moon: { nominative: 'Луна', dative: 'Луне', instrumental: 'Луной' },
+  mercury: { nominative: 'Меркурий', dative: 'Меркурию', instrumental: 'Меркурием' },
+  venus: { nominative: 'Венера', dative: 'Венере', instrumental: 'Венерой' },
+  mars: { nominative: 'Марс', dative: 'Марсу', instrumental: 'Марсом' },
+  jupiter: { nominative: 'Юпитер', dative: 'Юпитеру', instrumental: 'Юпитером' },
+  saturn: { nominative: 'Сатурн', dative: 'Сатурну', instrumental: 'Сатурном' },
+  uranus: { nominative: 'Уран', dative: 'Урану', instrumental: 'Ураном' },
+  neptune: { nominative: 'Нептун', dative: 'Нептуну', instrumental: 'Нептуном' },
+  pluto: { nominative: 'Плутон', dative: 'Плутону', instrumental: 'Плутоном' },
+  rahu: { nominative: 'Раху', dative: 'Раху', instrumental: 'Раху' },
 };
+
+// Transit texts: the moving planet is the event, the natal planet is your own theme.
+const TRANSIT_THEMES = {
+  sun: 'внешние события и внимание',
+  moon: 'настроение и быт',
+  mercury: 'новости и разговоры',
+  venus: 'отношения и деньги',
+  mars: 'напор и конфликты',
+  jupiter: 'рост и возможности',
+  saturn: 'требования и ограничения',
+  uranus: 'перемены и неожиданности',
+  neptune: 'туман и мечты',
+  pluto: 'давление и перелом',
+};
+
+const NATAL_THEMES = {
+  sun: ['характер', 'характером'],
+  moon: ['чувства', 'чувствами'],
+  mercury: ['мысли', 'мыслями'],
+  venus: ['любовь', 'любовью'],
+  mars: ['энергию', 'энергией'],
+  jupiter: ['рост', 'ростом'],
+  saturn: ['ответственность', 'ответственностью'],
+  uranus: ['свободу', 'свободой'],
+  neptune: ['мечты', 'мечтами'],
+  pluto: ['силу', 'силой'],
+  rahu: ['тягу к новому', 'тягой к новому'],
+};
+
+const TRANSIT_ASPECTS = {
+  conjunction: { phrase: 'в соединении с', nameCase: 'instrumental', verb: 'прямо включают' },
+  sextile: { phrase: 'в секстиле к', nameCase: 'dative', verb: 'мягко поддерживают' },
+  square: { phrase: 'в квадрате к', nameCase: 'dative', verb: 'проверяют на прочность' },
+  trine: { phrase: 'в трине к', nameCase: 'dative', verb: 'поддерживают' },
+  opposition: { phrase: 'в оппозиции к', nameCase: 'dative', verb: 'требуют равновесия с', themeCase: 'ins' },
+};
+
+const PERIOD_TITLES = {
+  week: 'Прогноз на неделю',
+  month: 'Прогноз на месяц',
+  year: 'Прогноз на год',
+};
+
+const FORECAST_NOTE = 'Только точные аспекты: медленные планеты — ко всем планетам карты, быстрые — к Солнцу и Луне.';
 
 // Plain words first, the astrology term in brackets, so nobody needs to know it.
 const ASPECT_TEXTS = {
@@ -256,6 +300,28 @@ function retrogradeNote(planets) {
 
   if (!names.length) return '';
   return `Ретроградными в момент рождения были: ${names.join(', ')}. Это не поломка — так бывает у всех; такие темы больше про внутреннее, чем про показное.`;
+}
+
+function transitLine(event) {
+  const aspect = TRANSIT_ASPECTS[event.aspect];
+  const transit = PLANET_CASES[event.transit];
+  const natal = PLANET_CASES[event.natal];
+  if (!aspect || !transit || !natal) return '';
+
+  const themes = NATAL_THEMES[event.natal];
+  const theme = aspect.themeCase === 'ins' ? themes[1] : themes[0];
+  return `${transit.nominative} ${aspect.phrase} ${natal[aspect.nameCase]}: ${TRANSIT_THEMES[event.transit]} ${aspect.verb} ${theme}.`;
+}
+
+/** Ready-to-render forecast: a title, a note and one dated line per exact transit. */
+export function buildForecast({ period, events, truncated }) {
+  const items = events.map((event) => ({ date: event.date, text: transitLine(event) })).filter((item) => item.text);
+
+  return {
+    title: PERIOD_TITLES[period] || PERIOD_TITLES.month,
+    note: truncated ? `${FORECAST_NOTE} Показаны ближайшие события.` : FORECAST_NOTE,
+    items,
+  };
 }
 
 function aspectLine(aspect) {
