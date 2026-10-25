@@ -8,105 +8,109 @@
 </head>
 <body>
   <main class="page">
+    <nav class="lang" aria-label="Язык сайта">
+      <button class="lang__button lang__button--active" type="button" data-lang="ru" aria-pressed="true">РУС</button>
+      <button class="lang__button" type="button" data-lang="uk" aria-pressed="false">УКР</button>
+      <button class="lang__button" type="button" data-lang="en" aria-pressed="false">ENG</button>
+    </nav>
+
     <nav class="tabs" role="tablist" aria-label="Разделы">
-      <button class="tab tab--active" type="button" role="tab" aria-selected="true" data-mode="chart">Карта</button>
-      <button class="tab" type="button" role="tab" aria-selected="false" data-mode="forecast">Прогноз</button>
-      <button class="tab" type="button" role="tab" aria-selected="false" data-mode="synastry">Совместимость</button>
-      <button class="tab" type="button" role="tab" aria-selected="false" data-mode="solar">Соляр</button>
+      <button class="tab tab--active" type="button" role="tab" aria-selected="true" data-mode="chart" data-i18n="tab.chart">Карта</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" data-mode="forecast" data-i18n="tab.forecast">Прогноз</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" data-mode="synastry" data-i18n="tab.synastry">Совместимость</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" data-mode="solar" data-i18n="tab.solar">Соляр</button>
     </nav>
 
     <header class="page__header">
-      <h1>Натальная карта</h1>
-      <p class="page__lead">Западная и ведическая карта по дате, времени и месту рождения.</p>
+      <h1 data-i18n="page.chart.title">Натальная карта</h1>
+      <p class="page__lead" data-i18n="page.chart.lead">Западная и ведическая карта по дате, времени и месту рождения. Показывает характер, сильные стороны и в чём стоит быть внимательнее.</p>
     </header>
 
-    <p class="source" data-chart-only>
+    <p class="source" data-chart-only data-i18n="source">
       Расчёт — Swiss Ephemeris 2.10 на эфемеридах NASA/JPL DE441. Положения планет совпадают
       с JPL Horizons с точностью до 0,2 угловой секунды; для сравнения, одна секунда дуги —
       это 1/3600 градуса.
     </p>
 
     <aside class="notice" data-chart-only>
-      <strong>Время рождения важно — но не для всего.</strong>
-      Ошибка в один час сдвигает восход и дома примерно на 15° (половина знака), в два часа — на целый
-      знак. Знаки Солнца, Луны и планет от часа почти не зависят: Луна меняет знак только при ошибке
-      в несколько часов. Если время примерное — читайте знаки, а восход и дома считайте ориентиром.
+      <strong data-i18n="notice.title">Время рождения важно — но не для всего.</strong>
+      <span data-i18n="notice.text">Ошибка в один час сдвигает восход и дома примерно на 15° (половина знака), в два часа — на целый знак. Знаки Солнца, Луны и планет от часа почти не зависят: Луна меняет знак только при ошибке в несколько часов. Если время примерное — читайте знаки, а восход и дома считайте ориентиром.</span>
     </aside>
 
     <form class="form" id="chart-form">
       <label class="field">
-        <span class="field__label">Дата рождения</span>
+        <span class="field__label" data-i18n="form.date">Дата рождения</span>
         <input class="field__input" type="date" name="date" required>
       </label>
 
       <label class="field">
-        <span class="field__label">Время рождения</span>
+        <span class="field__label" data-i18n="form.time">Время рождения</span>
         <input class="field__input" type="time" name="time" value="12:00" required>
-        <span class="field__hint">Если время неизвестно, оставьте 12:00 — дома и Луна будут неточными.</span>
+        <span class="field__hint" data-i18n="form.timeHint">Если время неизвестно, оставьте 12:00 — дома и Луна будут неточными.</span>
       </label>
 
       <label class="field">
-        <span class="field__label">Город рождения</span>
+        <span class="field__label" data-i18n="form.city">Город рождения</span>
         <input class="field__input" type="text" name="city" autocomplete="off" required>
       </label>
 
       <fieldset class="field field--choice" id="system-field">
-        <legend class="field__label">Какая карта</legend>
+        <legend class="field__label" data-i18n="form.system">Какая карта</legend>
         <label class="choice">
           <input class="choice__input" type="radio" name="system" value="western" checked>
-          <span>Западная</span>
+          <span data-i18n="form.western">Западная</span>
         </label>
         <label class="choice">
           <input class="choice__input" type="radio" name="system" value="vedic">
-          <span>Ведическая</span>
+          <span data-i18n="form.vedic">Ведическая</span>
         </label>
       </fieldset>
 
       <fieldset class="field field--choice" id="asteroid-field">
-        <legend class="field__label">Астероиды</legend>
+        <legend class="field__label" data-i18n="form.asteroids">Астероиды</legend>
         <label class="choice">
           <input class="choice__input" type="checkbox" name="asteroids">
-          <span>Показывать астероиды</span>
+          <span data-i18n="form.asteroidsShow">Показывать астероиды</span>
         </label>
-        <span class="field__hint">Хирон, Фолус, Церера, Паллада, Юнона, Веста — добавляют оттенки к карте.</span>
+        <span class="field__hint" data-i18n="form.asteroidsHint">Хирон, Фолус, Церера, Паллада, Юнона, Веста — добавляют оттенки к карте.</span>
       </fieldset>
 
       <label class="field field--solar" id="solar-field" hidden>
-        <span class="field__label">Город в день рождения</span>
+        <span class="field__label" data-i18n="form.solarCity">Город в день рождения</span>
         <input class="field__input" type="text" name="returnCity" autocomplete="off">
-        <span class="field__hint">Если в этот день вы будете не там, где родились, — укажите этот город. Пусто — считаем по городу рождения.</span>
+        <span class="field__hint" data-i18n="form.solarCityHint">Если в этот день вы будете не там, где родились, — укажите этот город. Пусто — считаем по городу рождения.</span>
       </label>
 
       <fieldset class="field field--person" id="partner-field" hidden>
-        <legend class="field__label">Второй человек</legend>
+        <legend class="field__label" data-i18n="partner.title">Второй человек</legend>
         <label class="field">
-          <span class="field__label">Дата рождения</span>
+          <span class="field__label" data-i18n="partner.date">Дата рождения</span>
           <input class="field__input" type="date" name="partnerDate">
         </label>
         <label class="field">
-          <span class="field__label">Время рождения</span>
+          <span class="field__label" data-i18n="partner.time">Время рождения</span>
           <input class="field__input" type="time" name="partnerTime" value="12:00">
-          <span class="field__hint">Если неизвестно, оставьте 12:00 — Луна и дома будут неточными.</span>
+          <span class="field__hint" data-i18n="partner.timeHint">Если неизвестно, оставьте 12:00 — Луна и дома будут неточными.</span>
         </label>
         <label class="field">
-          <span class="field__label">Город рождения</span>
+          <span class="field__label" data-i18n="partner.city">Город рождения</span>
           <input class="field__input" type="text" name="partnerCity" autocomplete="off">
         </label>
       </fieldset>
 
       <fieldset class="field field--choice" id="period-field" hidden>
-        <legend class="field__label">На какой срок прогноз</legend>
+        <legend class="field__label" data-i18n="period.title">На какой срок прогноз</legend>
         <label class="choice">
           <input class="choice__input" type="radio" name="period" value="week">
-          <span>Неделя</span>
+          <span data-i18n="period.week">Неделя</span>
         </label>
         <label class="choice">
           <input class="choice__input" type="radio" name="period" value="month" checked>
-          <span>Месяц</span>
+          <span data-i18n="period.month">Месяц</span>
         </label>
         <label class="choice">
           <input class="choice__input" type="radio" name="period" value="year">
-          <span>Год</span>
+          <span data-i18n="period.year">Год</span>
         </label>
       </fieldset>
 

@@ -238,6 +238,31 @@ h2 {
   color: var(--color-muted);
 }
 
+.lang {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  margin: 0 0 8px;
+}
+
+.lang__button {
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  background: none;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.lang__button--active {
+  color: var(--color-bg);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
 .tabs {
   display: flex;
   flex-wrap: wrap;
