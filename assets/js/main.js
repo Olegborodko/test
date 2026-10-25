@@ -443,12 +443,19 @@ export function renderSolar(solar) {
   const place = solar.place ? solar.place.name : '';
   const moment = `${formatDay(solar.local.date, true)}, ${solar.local.time}`;
   header.append(element('p', 'card__meta', [place, `возвращение Солнца ${moment}`].filter(Boolean).join(' · ')));
+  header.append(element('p', 'reading__text',
+    'Соляр — карта на момент, когда Солнце возвращается в ту точку, где было при рождении. Её читают как тему на год вперёд.'));
   header.append(element('p', 'reading__note', solar.note));
   result.append(header);
 
-  renderWheel(result, solar, 'western');
-  if (solar.reading) renderReading(result, solar.reading);
-  if (solar.western) renderWestern(result, solar.western);
+  if (solar.reading) {
+    const card = element('section', 'card');
+    for (const section of solar.reading.sections) {
+      card.append(element('h3', 'reading__title', section.title));
+      if (section.text) card.append(element('p', 'reading__text', section.text));
+    }
+    result.append(card);
+  }
   result.hidden = false;
 }
 

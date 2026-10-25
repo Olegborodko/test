@@ -1,6 +1,6 @@
 import { computeChart } from './chart.js';
 import { findPlace } from './geo.js';
-import { buildForecast, buildReading, buildSynastry } from './interpretation.js';
+import { buildForecast, buildReading, buildSolarReading, buildSynastry } from './interpretation.js';
 import { isPrecisionReady, loadPrecisionFiles } from './swe.js';
 import { computeSolarReturn } from './solar.js';
 import { computeSynastry } from './synastry.js';
@@ -178,11 +178,9 @@ async function handleSolar(request, env) {
       asteroids: body.asteroids === true && isPrecisionReady(),
     });
     const chart = result.chart;
-    const reading = buildReading({
-      system: 'western',
+    const reading = buildSolarReading({
       planets: chart.western.planets,
       ascendantSignIndex: Math.floor(chart.western.ascendant / 30),
-      aspects: chart.aspects,
     });
 
     return json({
@@ -190,7 +188,7 @@ async function handleSolar(request, env) {
       system: 'western',
       returnedAt: result.returnedAt,
       local: result.local,
-      note: 'Карта построена на место рождения. Если в этот день вы были в другом месте, дома и восход сдвинутся.',
+      note: 'Карта построена на город рождения. Если в день рождения вы будете в другом городе, тема года сдвинется.',
       input: chart.input,
       utc: chart.utc,
       julianDay: chart.julianDay,
