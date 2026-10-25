@@ -74,6 +74,36 @@ function clockIcon(label) {
   return svg;
 }
 
+/** Check mark for the legend, drawn rather than typed so it matches the clock. */
+function checkIcon() {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 16 16');
+  svg.setAttribute('class', 'icon-check');
+  svg.setAttribute('aria-hidden', 'true');
+
+  const tick = document.createElementNS(SVG_NS, 'path');
+  tick.setAttribute('d', 'M3.5 8.5L6.5 11.5L12.5 4.5');
+  tick.setAttribute('fill', 'none');
+  tick.setAttribute('stroke', 'currentColor');
+  tick.setAttribute('stroke-width', '1.8');
+  tick.setAttribute('stroke-linecap', 'round');
+  tick.setAttribute('stroke-linejoin', 'round');
+
+  svg.append(tick);
+  return svg;
+}
+
+/** Explicit badge, so it is obvious which parts move with the birth time. */
+function timeBadge(timeSensitive) {
+  const badge = element('span', timeSensitive ? 'badge badge--time' : 'badge badge--stable');
+  if (timeSensitive) {
+    badge.append(clockIcon('Зависит от времени рождения'), element('span', null, 'сдвинется, если время неверное'));
+  } else {
+    badge.append(element('span', null, 'время почти не влияет'));
+  }
+  return badge;
+}
+
 function element(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -113,7 +143,7 @@ function renderWestern(container, western) {
   const card = element('section', 'card');
   card.append(element('h2', null, 'Западная карта'));
   const meta = element('p', 'card__meta', `Тропический зодиак · дома Плацидуса · ASC ${signLabel(signNameOf(western.ascendant))} ${formatDegree(western.ascendant % 30)}`);
-  meta.append(clockIcon('Восход и дома зависят от времени рождения'));
+  meta.append(timeBadge(true));
   card.append(meta);
 
   const rows = western.planets.map((planet) => [
@@ -130,7 +160,7 @@ function renderVedic(container, vedic) {
   const card = element('section', 'card');
   card.append(element('h2', null, 'Ведическая карта'));
   const meta = element('p', 'card__meta', `Сидерический зодиак · аянамша ${vedic.ayanamsa} ${vedic.ayanamsaValue}° · ASC ${signLabel(vedic.ascendantRashi)}`);
-  meta.append(clockIcon('Восход и дома зависят от времени рождения'));
+  meta.append(timeBadge(true));
   card.append(meta);
 
   const rows = vedic.planets.map((planet) => [
@@ -156,7 +186,7 @@ function renderReading(container, reading) {
 
   for (const section of reading.sections) {
     const title = element('h3', 'reading__title', section.title);
-    if (section.timeSensitive) title.append(clockIcon('Зависит от времени рождения'));
+    title.append(timeBadge(section.timeSensitive));
     card.append(title);
     if (section.text) card.append(element('p', 'reading__text', section.text));
     if (section.note) card.append(element('p', 'reading__note', section.note));
@@ -168,8 +198,19 @@ function renderReading(container, reading) {
   }
 
   if (reading.timeNote) {
-    const note = element('p', 'reading__time', reading.timeNote);
-    note.prepend(clockIcon('Зависит от времени рождения'));
+    const note = element('p', 'reading__time');
+    const timeTag = element('span', 'tag tag--time');
+    timeTag.append(clockIcon('Зависит от времени рождения'), element('span', null, 'сдвинется, если время неверное'));
+
+    const stableTag = element('span', 'tag tag--stable');
+    stableTag.append(checkIcon(), element('span', null, 'время почти не влияет'));
+
+    note.append(
+      element('strong', null, 'Как читать значки: '),
+      timeTag,
+      stableTag,
+      element('span', null, reading.timeNote),
+    );
     card.append(note);
   }
 

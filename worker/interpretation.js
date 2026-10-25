@@ -239,7 +239,7 @@ export function buildReading({ system, planets, ascendantSignIndex }) {
     timeSensitive: true,
   });
 
-  const timeNote = 'Время важно там, где стоит этот значок: восход, дома и Луна. Знаки Солнца и планет почти не зависят от часа рождения.';
+  const timeNote = 'Восход, дома и Луна сдвинутся, если час рождения указан неверно. Знаки Солнца и остальных планет от времени почти не зависят.';
 
   return { ascendant: { sign: ascSign }, system, sections, timeNote };
 }
