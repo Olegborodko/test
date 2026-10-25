@@ -240,17 +240,19 @@ h2 {
 
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
   margin: 0 0 var(--space);
   padding: 4px;
   background: var(--color-surface);
-  border-radius: 999px;
+  border-radius: 16px;
 }
 
 .tab {
-  flex: 1;
-  padding: 10px 14px;
-  font-size: 0.95rem;
+  flex: 1 1 auto;
+  padding: 10px 10px;
+  font-size: 0.9rem;
+  white-space: nowrap;
   color: var(--color-muted);
   background: none;
   border: 0;

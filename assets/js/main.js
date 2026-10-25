@@ -101,10 +101,15 @@ function setMode(next) {
   }
   if (periodField) periodField.hidden = next !== 'forecast';
   if (partnerField) partnerField.hidden = next !== 'synastry';
-  if (systemField) systemField.hidden = next === 'synastry';
+  if (systemField) systemField.hidden = next === 'synastry' || next === 'solar';
   for (const input of partnerInputs) input.required = next === 'synastry';
 
-  const labels = { chart: 'Рассчитать', forecast: 'Показать прогноз', synastry: 'Сравнить карты' };
+  const labels = {
+    chart: 'Рассчитать',
+    forecast: 'Показать прогноз',
+    synastry: 'Сравнить карты',
+    solar: 'Показать соляр',
+  };
   submitButton.textContent = labels[next] || labels.chart;
   status.textContent = '';
   result.hidden = true;
@@ -430,6 +435,23 @@ export function renderForecast(forecast) {
   result.hidden = false;
 }
 
+export function renderSolar(solar) {
+  result.replaceChildren();
+
+  const header = element('section', 'card');
+  header.append(element('h2', null, 'Соляр'));
+  const place = solar.place ? solar.place.name : '';
+  const moment = `${formatDay(solar.local.date, true)}, ${solar.local.time}`;
+  header.append(element('p', 'card__meta', [place, `возвращение Солнца ${moment}`].filter(Boolean).join(' · ')));
+  header.append(element('p', 'reading__note', solar.note));
+  result.append(header);
+
+  renderWheel(result, solar, 'western');
+  if (solar.reading) renderReading(result, solar.reading);
+  if (solar.western) renderWestern(result, solar.western);
+  result.hidden = false;
+}
+
 export function renderSynastry(synastry) {
   result.replaceChildren();
 
@@ -482,7 +504,12 @@ async function submitChart(event) {
   payload.asteroids = data.get('asteroids') === 'on';
   if (mode === 'forecast') payload.period = data.get('period');
 
-  const endpoint = { chart: '/api/chart', forecast: '/api/transits', synastry: '/api/synastry' }[mode];
+  const endpoint = {
+    chart: '/api/chart',
+    forecast: '/api/transits',
+    synastry: '/api/synastry',
+    solar: '/api/solar',
+  }[mode];
 
   try {
     const response = await fetch(endpoint, {
@@ -500,6 +527,7 @@ async function submitChart(event) {
     status.textContent = '';
     if (mode === 'forecast') renderForecast(body);
     else if (mode === 'synastry') renderSynastry(body);
+    else if (mode === 'solar') renderSolar(body);
     else render(body);
   } catch {
     status.textContent = 'Сеть недоступна. Попробуйте ещё раз.';

@@ -2,6 +2,7 @@ import { computeChart } from './chart.js';
 import { findPlace } from './geo.js';
 import { buildForecast, buildReading, buildSynastry } from './interpretation.js';
 import { isPrecisionReady, loadPrecisionFiles } from './swe.js';
+import { computeSolarReturn } from './solar.js';
 import { computeSynastry } from './synastry.js';
 import { computeTransits, PERIOD_KEYS } from './transits.js';
 
@@ -152,6 +153,56 @@ async function handleSynastry(request, env) {
   }
 }
 
+async function handleSolar(request, env) {
+  if (request.method !== 'POST') {
+    return json({ error: 'method_not_allowed' }, 405);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'invalid_json' }, 400);
+  }
+
+  const birth = parseBirth(body);
+  if (birth.error) return json({ error: birth.error }, 400);
+
+  const location = await resolveLocation(body);
+  if (location.error) return json({ error: location.error }, location.status);
+
+  try {
+    await loadPrecisionFiles(env.ASSETS);
+    const result = await computeSolarReturn({
+      birth: { ...birth, ...location },
+      asteroids: body.asteroids === true && isPrecisionReady(),
+    });
+    const chart = result.chart;
+    const reading = buildReading({
+      system: 'western',
+      planets: chart.western.planets,
+      ascendantSignIndex: Math.floor(chart.western.ascendant / 30),
+      aspects: chart.aspects,
+    });
+
+    return json({
+      place: location.place,
+      system: 'western',
+      returnedAt: result.returnedAt,
+      local: result.local,
+      note: 'Карта построена на место рождения. Если в этот день вы были в другом месте, дома и восход сдвинутся.',
+      input: chart.input,
+      utc: chart.utc,
+      julianDay: chart.julianDay,
+      aspects: chart.aspects,
+      western: chart.western,
+      reading,
+    });
+  } catch (error) {
+    return json({ error: 'calculation_failed', message: String(error && error.message) }, 500);
+  }
+}
+
 async function handleTransits(request, env) {
   if (request.method !== 'POST') {
     return json({ error: 'method_not_allowed' }, 405);
@@ -221,6 +272,7 @@ export default {
     if (url.pathname === '/api/chart') return handleChart(request, env);
     if (url.pathname === '/api/transits') return handleTransits(request, env);
     if (url.pathname === '/api/synastry') return handleSynastry(request, env);
+    if (url.pathname === '/api/solar') return handleSolar(request, env);
     return env.ASSETS.fetch(request);
   },
 };

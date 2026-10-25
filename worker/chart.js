@@ -71,8 +71,8 @@ function zoneOffsetMs(instant, timeZone) {
 /** Local wall-clock birth time in a time zone to the matching UTC instant. */
 export function localToUtc(date, time, timeZone) {
   const [year, month, day] = date.split('-').map(Number);
-  const [hour, minute] = time.split(':').map(Number);
-  const wallClock = Date.UTC(year, month - 1, day, hour, minute);
+  const [hour, minute, second = 0] = time.split(':').map(Number);
+  const wallClock = Date.UTC(year, month - 1, day, hour, minute, second);
 
   let instant = wallClock;
   for (let i = 0; i < 3; i += 1) {
