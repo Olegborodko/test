@@ -264,8 +264,17 @@ h2 {
   outline-offset: 1px;
 }
 
-.field--choice[hidden] {
+.field--choice[hidden],
+.field--person[hidden] {
   display: none;
+}
+
+.field--person {
+  gap: 12px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
 }
 
 .forecast {

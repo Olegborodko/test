@@ -191,17 +191,17 @@ const PLANET_THEMES = {
 
 // Planet names plus the cases a sentence may need: "Солнце рядом с Луной".
 const PLANET_CASES = {
-  sun: { nominative: 'Солнце', genitive: 'Солнца', dative: 'Солнцу', instrumental: 'Солнцем' },
-  moon: { nominative: 'Луна', genitive: 'Луны', dative: 'Луне', instrumental: 'Луной' },
-  mercury: { nominative: 'Меркурий', genitive: 'Меркурия', dative: 'Меркурию', instrumental: 'Меркурием' },
-  venus: { nominative: 'Венера', genitive: 'Венеры', dative: 'Венере', instrumental: 'Венерой' },
-  mars: { nominative: 'Марс', genitive: 'Марса', dative: 'Марсу', instrumental: 'Марсом' },
-  jupiter: { nominative: 'Юпитер', genitive: 'Юпитера', dative: 'Юпитеру', instrumental: 'Юпитером' },
-  saturn: { nominative: 'Сатурн', genitive: 'Сатурна', dative: 'Сатурну', instrumental: 'Сатурном' },
-  uranus: { nominative: 'Уран', genitive: 'Урана', dative: 'Урану', instrumental: 'Ураном' },
-  neptune: { nominative: 'Нептун', genitive: 'Нептуна', dative: 'Нептуну', instrumental: 'Нептуном' },
-  pluto: { nominative: 'Плутон', genitive: 'Плутона', dative: 'Плутону', instrumental: 'Плутоном' },
-  rahu: { nominative: 'Раху', genitive: 'Раху', dative: 'Раху', instrumental: 'Раху' },
+  sun: { possessive: 'Твоё', nominative: 'Солнце', genitive: 'Солнца', dative: 'Солнцу', instrumental: 'Солнцем' },
+  moon: { possessive: 'Твоя', nominative: 'Луна', genitive: 'Луны', dative: 'Луне', instrumental: 'Луной' },
+  mercury: { possessive: 'Твой', nominative: 'Меркурий', genitive: 'Меркурия', dative: 'Меркурию', instrumental: 'Меркурием' },
+  venus: { possessive: 'Твоя', nominative: 'Венера', genitive: 'Венеры', dative: 'Венере', instrumental: 'Венерой' },
+  mars: { possessive: 'Твой', nominative: 'Марс', genitive: 'Марса', dative: 'Марсу', instrumental: 'Марсом' },
+  jupiter: { possessive: 'Твой', nominative: 'Юпитер', genitive: 'Юпитера', dative: 'Юпитеру', instrumental: 'Юпитером' },
+  saturn: { possessive: 'Твой', nominative: 'Сатурн', genitive: 'Сатурна', dative: 'Сатурну', instrumental: 'Сатурном' },
+  uranus: { possessive: 'Твой', nominative: 'Уран', genitive: 'Урана', dative: 'Урану', instrumental: 'Ураном' },
+  neptune: { possessive: 'Твой', nominative: 'Нептун', genitive: 'Нептуна', dative: 'Нептуну', instrumental: 'Нептуном' },
+  pluto: { possessive: 'Твой', nominative: 'Плутон', genitive: 'Плутона', dative: 'Плутону', instrumental: 'Плутоном' },
+  rahu: { possessive: 'Твой', nominative: 'Раху', genitive: 'Раху', dative: 'Раху', instrumental: 'Раху' },
 };
 
 // Transit texts: the moving planet is the event, the natal planet is your own theme.
@@ -239,6 +239,17 @@ const TRANSIT_ASPECTS = {
   trine: { phrase: 'ладит с', nameCase: 'instrumental', term: 'трин', verb: 'поддерживают' },
   opposition: { phrase: 'встаёт напротив', nameCase: 'genitive', term: 'оппозиция', verb: 'требуют равновесия с', themeCase: 'ins' },
 };
+
+// Synastry texts: my planet, the partner's planet, and what the contact feels like.
+const SYNASTRY_ASPECTS = {
+  conjunction: { label: 'рядом', term: 'соединение', meaning: 'сливаются в одно, и разделить их трудно' },
+  sextile: { label: 'мягкая связь', term: 'секстиль', meaning: 'поддерживают друг друга, если делать шаг' },
+  square: { label: 'напряжение', term: 'квадрат', meaning: 'тянут в разные стороны, и это трение' },
+  trine: { label: 'согласие', term: 'трин', meaning: 'ладят сами собой, и это сильная сторона' },
+  opposition: { label: 'противоположность', term: 'оппозиция', meaning: 'тянут в разные стороны, нужен баланс' },
+};
+
+const SYNASTRY_NOTE = 'Считаются связи личных планет: Солнце, Луна, Меркурий, Венера, Марс. Медленные планеты у ровесников стоят в одних знаках и о совместимости говорят мало.';
 
 const PERIOD_TITLES = {
   week: 'Прогноз на неделю',
@@ -300,6 +311,30 @@ function retrogradeNote(planets) {
 
   if (!names.length) return '';
   return `Ретроградными в момент рождения были: ${names.join(', ')}. Это не поломка — так бывает у всех; такие темы больше про внутреннее, чем про показное.`;
+}
+
+function synastryLine(aspect) {
+  const text = SYNASTRY_ASPECTS[aspect.type];
+  const first = PLANET_CASES[aspect.first];
+  const second = PLANET_CASES[aspect.second];
+  if (!text || !first || !second) return '';
+
+  const subject = `${first.possessive} ${first.nominative} и ${second.nominative} партнёра`;
+  const meaning = aspect.first === aspect.second
+    ? 'эта тема у вас общая и работает одинаково'
+    : `${PLANET_THEMES[aspect.first]} и ${PLANET_THEMES[aspect.second]} ${text.meaning}`;
+
+  return `${subject} — ${text.label} (${text.term}): ${meaning}.`;
+}
+
+/** Ready-to-render synastry: one dated line is not needed here, the texts are enough. */
+export function buildSynastry({ aspects, truncated }) {
+  const items = aspects.map(synastryLine).filter(Boolean);
+  return {
+    title: 'Совместимость',
+    note: truncated ? `${SYNASTRY_NOTE} Показаны 12 самых точных связей.` : SYNASTRY_NOTE,
+    items,
+  };
 }
 
 function transitLine(event) {

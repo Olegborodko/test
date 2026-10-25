@@ -1,7 +1,8 @@
 import { computeChart } from './chart.js';
 import { findPlace } from './geo.js';
-import { buildForecast, buildReading } from './interpretation.js';
+import { buildForecast, buildReading, buildSynastry } from './interpretation.js';
 import { loadPrecisionFiles } from './swe.js';
+import { computeSynastry } from './synastry.js';
 import { computeTransits, PERIOD_KEYS } from './transits.js';
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -91,6 +92,54 @@ async function handleChart(request, env) {
   }
 }
 
+function parseBirth(input) {
+  const date = String(input.date || '').trim();
+  const time = String(input.time || '').trim() || '12:00';
+  if (!DATE_PATTERN.test(date)) return { error: 'invalid_date' };
+  if (!TIME_PATTERN.test(time)) return { error: 'invalid_time' };
+  return { date, time };
+}
+
+async function handleSynastry(request, env) {
+  if (request.method !== 'POST') {
+    return json({ error: 'method_not_allowed' }, 405);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'invalid_json' }, 400);
+  }
+
+  const firstBirth = parseBirth(body.first || {});
+  if (firstBirth.error) return json({ error: firstBirth.error }, 400);
+  const secondBirth = parseBirth(body.second || {});
+  if (secondBirth.error) return json({ error: secondBirth.error }, 400);
+
+  const firstLocation = await resolveLocation(body.first || {});
+  if (firstLocation.error) return json({ error: firstLocation.error }, firstLocation.status);
+  const secondLocation = await resolveLocation(body.second || {});
+  if (secondLocation.error) return json({ error: secondLocation.error }, secondLocation.status);
+
+  try {
+    await loadPrecisionFiles(env.ASSETS);
+    const result = await computeSynastry({
+      first: { ...firstBirth, ...firstLocation },
+      second: { ...secondBirth, ...secondLocation },
+    });
+    const reading = buildSynastry({ aspects: result.aspects, truncated: result.truncated });
+    return json({
+      first: { place: firstLocation.place },
+      second: { place: secondLocation.place },
+      aspects: result.aspects,
+      reading,
+    });
+  } catch (error) {
+    return json({ error: 'calculation_failed', message: String(error && error.message) }, 500);
+  }
+}
+
 async function handleTransits(request, env) {
   if (request.method !== 'POST') {
     return json({ error: 'method_not_allowed' }, 405);
@@ -148,6 +197,7 @@ export default {
     if (url.pathname === '/api/warm') return json({ ok: true });
     if (url.pathname === '/api/chart') return handleChart(request, env);
     if (url.pathname === '/api/transits') return handleTransits(request, env);
+    if (url.pathname === '/api/synastry') return handleSynastry(request, env);
     return env.ASSETS.fetch(request);
   },
 };

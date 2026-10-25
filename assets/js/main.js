@@ -73,6 +73,9 @@ const status = hasDom ? document.getElementById('status') : null;
 const result = hasDom ? document.getElementById('result') : null;
 const submitButton = hasDom ? form.querySelector('button[type="submit"]') : null;
 const periodField = hasDom ? document.getElementById('period-field') : null;
+const systemField = hasDom ? document.getElementById('system-field') : null;
+const partnerField = hasDom ? document.getElementById('partner-field') : null;
+const partnerInputs = hasDom ? [...document.querySelectorAll('[name^="partner"]')] : [];
 const tabs = hasDom ? document.querySelectorAll('.tab') : [];
 
 let mode = 'chart';
@@ -85,7 +88,12 @@ function setMode(next) {
     tab.setAttribute('aria-selected', String(active));
   }
   if (periodField) periodField.hidden = next !== 'forecast';
-  submitButton.textContent = next === 'forecast' ? 'Показать прогноз' : 'Рассчитать';
+  if (partnerField) partnerField.hidden = next !== 'synastry';
+  if (systemField) systemField.hidden = next === 'synastry';
+  for (const input of partnerInputs) input.required = next === 'synastry';
+
+  const labels = { chart: 'Рассчитать', forecast: 'Показать прогноз', synastry: 'Сравнить карты' };
+  submitButton.textContent = labels[next] || labels.chart;
   status.textContent = '';
   result.hidden = true;
 }
@@ -410,6 +418,30 @@ export function renderForecast(forecast) {
   result.hidden = false;
 }
 
+export function renderSynastry(synastry) {
+  result.replaceChildren();
+
+  const header = element('section', 'card');
+  header.append(element('h2', null, synastry.reading.title));
+  const places = [synastry.first.place, synastry.second.place]
+    .filter(Boolean)
+    .map((place) => place.name);
+  header.append(element('p', 'card__meta', places.length === 2 ? places.join(' и ') : 'Две карты'));
+  result.append(header);
+
+  const card = element('section', 'card');
+  if (!synastry.reading.items.length) {
+    card.append(element('p', 'reading__text', 'Точных связей между личными планетами не нашлось — карты мало пересекаются. Это не приговор, просто читать нечего.'));
+  } else {
+    const list = element('ul', 'reading__list');
+    for (const item of synastry.reading.items) list.append(element('li', null, item));
+    card.append(list);
+  }
+  card.append(element('p', 'card__meta', synastry.reading.note));
+  result.append(card);
+  result.hidden = false;
+}
+
 async function submitChart(event) {
   event.preventDefault();
   submitButton.disabled = true;
@@ -417,16 +449,27 @@ async function submitChart(event) {
   result.hidden = true;
 
   const data = new FormData(form);
-  const payload = {
-    date: data.get('date'),
-    time: data.get('time'),
-    city: data.get('city'),
-    system: data.get('system'),
-  };
+  const payload = mode === 'synastry'
+    ? {
+        first: { date: data.get('date'), time: data.get('time'), city: data.get('city') },
+        second: {
+          date: data.get('partnerDate'),
+          time: data.get('partnerTime'),
+          city: data.get('partnerCity'),
+        },
+      }
+    : {
+        date: data.get('date'),
+        time: data.get('time'),
+        city: data.get('city'),
+        system: data.get('system'),
+      };
   if (mode === 'forecast') payload.period = data.get('period');
 
+  const endpoint = { chart: '/api/chart', forecast: '/api/transits', synastry: '/api/synastry' }[mode];
+
   try {
-    const response = await fetch(mode === 'forecast' ? '/api/transits' : '/api/chart', {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(payload),
@@ -440,6 +483,7 @@ async function submitChart(event) {
 
     status.textContent = '';
     if (mode === 'forecast') renderForecast(body);
+    else if (mode === 'synastry') renderSynastry(body);
     else render(body);
   } catch {
     status.textContent = 'Сеть недоступна. Попробуйте ещё раз.';

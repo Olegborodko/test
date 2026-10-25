@@ -22,6 +22,7 @@
     <nav class="tabs" role="tablist" aria-label="Разделы">
       <button class="tab tab--active" type="button" role="tab" aria-selected="true" data-mode="chart">Карта</button>
       <button class="tab" type="button" role="tab" aria-selected="false" data-mode="forecast">Прогноз</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" data-mode="synastry">Совместимость</button>
     </nav>
 
     <aside class="notice">
@@ -48,7 +49,7 @@
         <input class="field__input" type="text" name="city" autocomplete="off" required>
       </label>
 
-      <fieldset class="field field--choice">
+      <fieldset class="field field--choice" id="system-field">
         <legend class="field__label">Какая карта</legend>
         <label class="choice">
           <input class="choice__input" type="radio" name="system" value="western" checked>
@@ -57,6 +58,23 @@
         <label class="choice">
           <input class="choice__input" type="radio" name="system" value="vedic">
           <span>Ведическая</span>
+        </label>
+      </fieldset>
+
+      <fieldset class="field field--person" id="partner-field" hidden>
+        <legend class="field__label">Второй человек</legend>
+        <label class="field">
+          <span class="field__label">Дата рождения</span>
+          <input class="field__input" type="date" name="partnerDate">
+        </label>
+        <label class="field">
+          <span class="field__label">Время рождения</span>
+          <input class="field__input" type="time" name="partnerTime" value="12:00">
+          <span class="field__hint">Если неизвестно, оставьте 12:00 — Луна и дома будут неточными.</span>
+        </label>
+        <label class="field">
+          <span class="field__label">Город рождения</span>
+          <input class="field__input" type="text" name="partnerCity" autocomplete="off">
         </label>
       </fieldset>
 

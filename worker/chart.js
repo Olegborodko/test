@@ -130,6 +130,28 @@ function computeAspects(planets) {
   return found.sort((first, second) => first.orb - second.orb);
 }
 
+/** Major aspects between two sets of planets, the tightest ones first. */
+export function findAspectsBetween(firstPlanets, secondPlanets) {
+  const found = [];
+
+  for (const first of firstPlanets) {
+    for (const second of secondPlanets) {
+      const distance = angularDistance(first.longitude, second.longitude);
+      const aspect = ASPECTS.find((candidate) => Math.abs(distance - candidate.angle) <= candidate.orb);
+      if (!aspect) continue;
+      found.push({
+        first: first.key,
+        second: second.key,
+        type: aspect.type,
+        angle: aspect.angle,
+        orb: round(Math.abs(distance - aspect.angle), 2),
+      });
+    }
+  }
+
+  return found.sort((a, b) => a.orb - b.orb);
+}
+
 function describePosition(position) {
   return {
     sign: position.sign,
