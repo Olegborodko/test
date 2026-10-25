@@ -27,6 +27,36 @@ const PLANET_NAMES = {
   rahu: 'Раху',
 };
 
+// Short labels for the wheel: full names do not fit around a circle on a phone.
+const SIGN_SHORT = {
+  Aries: 'Овн',
+  Taurus: 'Тел',
+  Gemini: 'Бли',
+  Cancer: 'Рак',
+  Leo: 'Лев',
+  Virgo: 'Дев',
+  Libra: 'Вес',
+  Scorpio: 'Ско',
+  Sagittarius: 'Стр',
+  Capricorn: 'Коз',
+  Aquarius: 'Вод',
+  Pisces: 'Рыб',
+};
+
+const PLANET_SHORT = {
+  sun: 'Сол',
+  moon: 'Луна',
+  mercury: 'Мер',
+  venus: 'Вен',
+  mars: 'Мар',
+  jupiter: 'Юп',
+  saturn: 'Сат',
+  uranus: 'Ур',
+  neptune: 'Неп',
+  pluto: 'Пл',
+  rahu: 'Рах',
+};
+
 const ERROR_MESSAGES = {
   place_not_found: 'Город не найден. Попробуйте написать иначе.',
   geocoding_unavailable: 'Сервис поиска городов недоступен. Попробуйте позже.',
@@ -36,10 +66,12 @@ const ERROR_MESSAGES = {
   invalid_time: 'Проверьте время рождения.',
 };
 
-const form = document.getElementById('chart-form');
-const status = document.getElementById('status');
-const result = document.getElementById('result');
-const submitButton = form.querySelector('button[type="submit"]');
+// The module is also imported by the layout check outside a browser.
+const hasDom = typeof document !== 'undefined';
+const form = hasDom ? document.getElementById('chart-form') : null;
+const status = hasDom ? document.getElementById('status') : null;
+const result = hasDom ? document.getElementById('result') : null;
+const submitButton = hasDom ? form.querySelector('button[type="submit"]') : null;
 
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -133,6 +165,176 @@ function renderReading(container, reading) {
   container.append(card);
 }
 
+function round1(value) {
+  return Math.round(value * 10) / 10;
+}
+
+/** Point on the wheel for a longitude, with the ascendant on the left. */
+function polar(longitude, ascendant, radius) {
+  const angle = ((longitude - ascendant) * Math.PI) / 180;
+  return {
+    x: round1(180 - radius * Math.cos(angle)),
+    y: round1(180 + radius * Math.sin(angle)),
+  };
+}
+
+function radialLine(longitude, ascendant, inner, outer) {
+  const start = polar(longitude, ascendant, inner);
+  const end = polar(longitude, ascendant, outer);
+  return { x1: start.x, y1: start.y, x2: end.x, y2: end.y };
+}
+
+/** Coordinates for every part of the wheel; kept apart from the SVG for checks. */
+export function wheelLayout({ ascendant, cusps, planets, aspects }) {
+  const signs = Object.keys(SIGN_NAMES).map((sign, index) => {
+    const point = polar(index * 30 + 15, ascendant, 156);
+    return { text: SIGN_SHORT[sign], x: point.x, y: point.y };
+  });
+
+  const houseLines = cusps.map((cusp) => radialLine(cusp, ascendant, 92, 140));
+
+  const houseNumbers = cusps.map((cusp, index) => {
+    const span = (cusps[(index + 1) % 12] - cusp + 360) % 360;
+    const point = polar(cusp + span / 2, ascendant, 128);
+    return { text: String(index + 1), x: point.x, y: point.y };
+  });
+
+  // Planets standing next to each other would print their labels on top of one
+  // another, so close neighbours alternate between two radii.
+  const ordered = [...planets].sort((first, second) => (
+    ((first.longitude - ascendant + 360) % 360) - ((second.longitude - ascendant + 360) % 360)
+  ));
+
+  let previousOffset = null;
+  let shifted = false;
+  const markers = ordered.map((planet) => {
+    const offset = (planet.longitude - ascendant + 360) % 360;
+    if (previousOffset !== null && offset - previousOffset < 8) shifted = !shifted;
+    else shifted = false;
+    previousOffset = offset;
+
+    const dot = polar(planet.longitude, ascendant, 139);
+    const label = polar(planet.longitude, ascendant, shifted ? 102 : 114);
+    return {
+      key: planet.key,
+      text: PLANET_SHORT[planet.key] || planet.key,
+      dotX: dot.x,
+      dotY: dot.y,
+      x: label.x,
+      y: label.y,
+    };
+  });
+
+  const aspectLines = aspects
+    .filter((aspect) => aspect.type !== 'conjunction')
+    .map((aspect) => {
+      const from = planets.find((planet) => planet.key === aspect.from);
+      const to = planets.find((planet) => planet.key === aspect.to);
+      if (!from || !to) return null;
+      const start = polar(from.longitude, ascendant, 92);
+      const end = polar(to.longitude, ascendant, 92);
+      return { type: aspect.type, x1: start.x, y1: start.y, x2: end.x, y2: end.y };
+    })
+    .filter(Boolean);
+
+  return {
+    ascendant: radialLine(ascendant, ascendant, 92, 140),
+    signs,
+    houseLines,
+    houseNumbers,
+    markers,
+    aspectLines,
+  };
+}
+
+function svgNode(tag, attributes, text) {
+  const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, String(value));
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+export function renderWheel(container, chart, system) {
+  const data = chart[system];
+  if (!data) return;
+  const vedic = system === 'vedic';
+
+  // Vedic charts count whole signs from the rashi of the ascendant, so there the
+  // cusps are sign boundaries that start at the ascendant's sign.
+  const ascendantSign = Math.floor(data.ascendant / 30) * 30;
+  const cusps = vedic
+    ? Array.from({ length: 12 }, (_, index) => (ascendantSign + index * 30) % 360)
+    : data.cusps;
+
+  const layout = wheelLayout({
+    ascendant: data.ascendant,
+    cusps,
+    planets: data.planets,
+    aspects: chart.aspects || [],
+  });
+
+  const card = element('section', 'card');
+  card.append(element('h2', null, 'Круг карты'));
+  card.append(element('p', 'card__meta', vedic
+    ? 'Сидерический зодиак, дома от восхода по целым знакам.'
+    : 'Тропический зодиак, дома Плацидуса.'));
+
+  const svg = svgNode('svg', {
+    class: 'wheel',
+    viewBox: '0 0 360 360',
+    role: 'img',
+    'aria-label': 'Круг натальной карты: зодиак, дома, планеты и аспекты',
+  });
+
+  const text = (className, point, content) => svgNode('text', {
+    class: className,
+    x: point.x,
+    y: point.y,
+    'text-anchor': 'middle',
+    'dominant-baseline': 'middle',
+  }, content);
+
+  svg.append(
+    svgNode('circle', { class: 'wheel__ring', cx: 180, cy: 180, r: 172 }),
+    svgNode('circle', { class: 'wheel__ring', cx: 180, cy: 180, r: 140 }),
+    svgNode('circle', { class: 'wheel__ring wheel__ring--dashed', cx: 180, cy: 180, r: 92 }),
+  );
+
+  for (const line of layout.aspectLines) {
+    const tone = line.type === 'trine' || line.type === 'sextile' ? 'good' : 'tension';
+    svg.append(svgNode('line', {
+      class: `wheel__aspect wheel__aspect--${tone}`,
+      x1: line.x1,
+      y1: line.y1,
+      x2: line.x2,
+      y2: line.y2,
+    }));
+  }
+
+  for (const line of layout.houseLines) {
+    svg.append(svgNode('line', { class: 'wheel__cusp', ...line }));
+  }
+  svg.append(svgNode('line', { class: 'wheel__cusp wheel__cusp--asc', ...layout.ascendant }));
+
+  for (const house of layout.houseNumbers) svg.append(text('wheel__house', house, house.text));
+  for (const point of layout.signs) svg.append(text('wheel__sign', point, point.text));
+
+  for (const marker of layout.markers) {
+    svg.append(svgNode('circle', {
+      class: 'wheel__planet-dot',
+      cx: marker.dotX,
+      cy: marker.dotY,
+      r: 2.4,
+    }));
+    svg.append(text('wheel__planet', marker, marker.text));
+  }
+
+  card.append(svg);
+  card.append(element('p', 'card__meta',
+    'Числа — номера домов. Лиловым показан восход (ASC). Зелёные линии — аспекты согласия, красные — напряжения.'));
+  container.append(card);
+}
+
 function render(chart) {
   result.replaceChildren();
 
@@ -142,13 +344,15 @@ function render(chart) {
   header.append(element('p', 'card__meta', `Всемирное время: ${chart.utc.replace('T', ' ').slice(0, 16)} · JD ${chart.julianDay}`));
   result.append(header);
 
+  renderWheel(result, chart, chart.system);
+
   if (chart.reading) renderReading(result, chart.reading);
   if (chart.western) renderWestern(result, chart.western);
   if (chart.vedic) renderVedic(result, chart.vedic);
   result.hidden = false;
 }
 
-form.addEventListener('submit', async (event) => {
+async function submitChart(event) {
   event.preventDefault();
   submitButton.disabled = true;
   status.textContent = 'Считаем…';
@@ -182,4 +386,6 @@ form.addEventListener('submit', async (event) => {
   } finally {
     submitButton.disabled = false;
   }
-});
+}
+
+if (hasDom) form.addEventListener('submit', submitChart);
