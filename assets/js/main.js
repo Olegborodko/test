@@ -92,6 +92,9 @@ function setMode(next) {
 
 for (const tab of tabs) tab.addEventListener('click', () => setMode(tab.dataset.mode));
 
+// Warm the server's full ephemeris while the visitor fills the form.
+fetch('/api/warm', { method: 'POST' }).catch(() => {});
+
 function element(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;

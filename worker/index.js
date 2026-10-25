@@ -1,6 +1,7 @@
 import { computeChart } from './chart.js';
 import { findPlace } from './geo.js';
 import { buildForecast, buildReading } from './interpretation.js';
+import { loadPrecisionFiles } from './swe.js';
 import { computeTransits, PERIOD_KEYS } from './transits.js';
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -46,7 +47,7 @@ async function resolveLocation(body) {
   return { place, latitude, longitude, timeZone };
 }
 
-async function handleChart(request) {
+async function handleChart(request, env) {
   if (request.method !== 'POST') {
     return json({ error: 'method_not_allowed' }, 405);
   }
@@ -71,6 +72,9 @@ async function handleChart(request) {
   const system = body.system === 'vedic' ? 'vedic' : 'western';
 
   try {
+    // Exact positions need the ephemeris files; the fetch is cached per isolate,
+    // so only the first calculation of an isolate pays for it.
+    await loadPrecisionFiles(env.ASSETS);
     const chart = await computeChart({ date, time, timeZone, latitude, longitude });
     const { western, vedic, ...shared } = chart;
     const selected = system === 'vedic' ? vedic : western;
@@ -87,7 +91,7 @@ async function handleChart(request) {
   }
 }
 
-async function handleTransits(request) {
+async function handleTransits(request, env) {
   if (request.method !== 'POST') {
     return json({ error: 'method_not_allowed' }, 405);
   }
@@ -111,6 +115,7 @@ async function handleTransits(request) {
   const period = PERIOD_KEYS.includes(body.period) ? body.period : 'month';
 
   try {
+    await loadPrecisionFiles(env.ASSETS);
     const chart = await computeChart({ date, time, timeZone, latitude, longitude });
     const forecast = await computeTransits({ natalPlanets: chart.western.planets, period });
     const reading = buildForecast({
@@ -132,10 +137,17 @@ async function handleTransits(request) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if (url.pathname === '/api/chart') return handleChart(request);
-    if (url.pathname === '/api/transits') return handleTransits(request);
+
+    // Warm the full ephemeris in the background, so no visitor waits for it.
+    if (url.pathname.startsWith('/api/') && env.ASSETS && ctx && typeof ctx.waitUntil === 'function') {
+      ctx.waitUntil(loadPrecisionFiles(env.ASSETS));
+    }
+
+    if (url.pathname === '/api/warm') return json({ ok: true });
+    if (url.pathname === '/api/chart') return handleChart(request, env);
+    if (url.pathname === '/api/transits') return handleTransits(request, env);
     return env.ASSETS.fetch(request);
   },
 };

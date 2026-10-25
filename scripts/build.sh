@@ -17,6 +17,12 @@ fi
 # the binary has to exist next to the Worker source before bundling.
 cp node_modules/@kuntay/swisseph/wasm/swisseph.wasm worker/swisseph.wasm
 
+# Full ephemeris files (JPL DE441 through Swiss Ephemeris), served next to the
+# page and mounted lazily by the Worker. Missing files just mean Moshier.
+mkdir -p dist/public/ephe
+cp node_modules/@kuntay/swisseph-data/ephe/sepl_18.se1 dist/public/ephe/
+cp node_modules/@kuntay/swisseph-data/ephe/semo_18.se1 dist/public/ephe/
+
 # Bundle Worker + dependencies with wrangler, which knows how to keep a .wasm
 # import as a separate module for the platform.
 npx wrangler deploy --dry-run --outdir dist/bundle >/dev/null
