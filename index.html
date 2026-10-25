@@ -8,17 +8,6 @@
 </head>
 <body>
   <main class="page">
-    <header class="page__header">
-      <h1>Натальная карта</h1>
-      <p class="page__lead">Западная и ведическая карта по дате, времени и месту рождения.</p>
-    </header>
-
-    <p class="source">
-      Расчёт — Swiss Ephemeris 2.10 на эфемеридах NASA/JPL DE441. Положения планет совпадают
-      с JPL Horizons с точностью до 0,2 угловой секунды; для сравнения, одна секунда дуги —
-      это 1/3600 градуса.
-    </p>
-
     <nav class="tabs" role="tablist" aria-label="Разделы">
       <button class="tab tab--active" type="button" role="tab" aria-selected="true" data-mode="chart">Карта</button>
       <button class="tab" type="button" role="tab" aria-selected="false" data-mode="forecast">Прогноз</button>
@@ -26,7 +15,18 @@
       <button class="tab" type="button" role="tab" aria-selected="false" data-mode="solar">Соляр</button>
     </nav>
 
-    <aside class="notice">
+    <header class="page__header" data-chart-only>
+      <h1>Натальная карта</h1>
+      <p class="page__lead">Западная и ведическая карта по дате, времени и месту рождения.</p>
+    </header>
+
+    <p class="source" data-chart-only>
+      Расчёт — Swiss Ephemeris 2.10 на эфемеридах NASA/JPL DE441. Положения планет совпадают
+      с JPL Horizons с точностью до 0,2 угловой секунды; для сравнения, одна секунда дуги —
+      это 1/3600 градуса.
+    </p>
+
+    <aside class="notice" data-chart-only>
       <strong>Время рождения важно — но не для всего.</strong>
       Ошибка в один час сдвигает восход и дома примерно на 15° (половина знака), в два часа — на целый
       знак. Знаки Солнца, Луны и планет от часа почти не зависят: Луна меняет знак только при ошибке

@@ -90,6 +90,7 @@ const partnerField = hasDom ? document.getElementById('partner-field') : null;
 const solarField = hasDom ? document.getElementById('solar-field') : null;
 const partnerInputs = hasDom ? [...document.querySelectorAll('[name^="partner"]')] : [];
 const tabs = hasDom ? document.querySelectorAll('.tab') : [];
+const chartOnlyBlocks = hasDom ? document.querySelectorAll('[data-chart-only]') : [];
 
 let mode = 'chart';
 
@@ -104,6 +105,7 @@ function setMode(next) {
   if (partnerField) partnerField.hidden = next !== 'synastry';
   if (solarField) solarField.hidden = next !== 'solar';
   if (systemField) systemField.hidden = next === 'synastry' || next === 'solar';
+  for (const block of chartOnlyBlocks) block.hidden = next !== 'chart';
   for (const input of partnerInputs) input.required = next === 'synastry';
 
   const labels = {
