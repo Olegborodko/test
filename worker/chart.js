@@ -12,7 +12,21 @@ export const BODIES = [
   ['neptune', 'Neptune'],
   ['pluto', 'Pluto'],
   ['rahu', 'NorthNodeMean'],
+  ['chiron', 'Chiron'],
+  ['pholus', 'Pholus'],
+  ['ceres', 'Ceres'],
+  ['pallas', 'Pallas'],
+  ['juno', 'Juno'],
+  ['vesta', 'Vesta'],
 ];
+
+// Asteroids have no analytic theory: their calls throw unless the asteroid
+// ephemeris file is mounted. They are opt-in for exactly that reason.
+export const ASTEROIDS = new Set(['chiron', 'pholus', 'ceres', 'pallas', 'juno', 'vesta']);
+
+export function bodiesFor(includeAsteroids) {
+  return BODIES.filter(([key]) => includeAsteroids || !ASTEROIDS.has(key));
+}
 
 const NAKSHATRAS = [
   'Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashira', 'Ardra', 'Punarvasu',
@@ -162,7 +176,7 @@ function describePosition(position) {
   };
 }
 
-export async function computeChart({ date, time, timeZone, latitude, longitude }) {
+export async function computeChart({ date, time, timeZone, latitude, longitude, asteroids = false }) {
   const { swe, mod } = await getEngine();
 
   const utc = localToUtc(date, time, timeZone);
@@ -171,7 +185,9 @@ export async function computeChart({ date, time, timeZone, latitude, longitude }
 
   // Everything below is synchronous on purpose: the engine instance is shared
   // inside the isolate, so the sidereal mode must not leak between requests.
-  const westernPlanets = BODIES.map(([key, name]) => ({
+  const bodies = bodiesFor(asteroids);
+
+  const westernPlanets = bodies.map(([key, name]) => ({
     key,
     ...describePosition(swe.calcWithSign(jd, mod.Body[name], { flags: mod.Flag.Speed })),
   }));
@@ -195,7 +211,7 @@ export async function computeChart({ date, time, timeZone, latitude, longitude }
   swe.setSiderealMode(mod.Ayanamsa.Lahiri);
   const siderealFlags = mod.Flag.Speed | mod.Flag.Sidereal;
 
-  let vedicPlanets = BODIES.map(([key, name]) => {
+  let vedicPlanets = bodies.map(([key, name]) => {
     const position = swe.calcWithSign(jd, mod.Body[name], { flags: siderealFlags });
     const withinNakshatra = position.longitude % NAKSHATRA_SPAN;
     return {

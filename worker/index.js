@@ -1,7 +1,7 @@
 import { computeChart } from './chart.js';
 import { findPlace } from './geo.js';
 import { buildForecast, buildReading, buildSynastry } from './interpretation.js';
-import { loadPrecisionFiles } from './swe.js';
+import { isPrecisionReady, loadPrecisionFiles } from './swe.js';
 import { computeSynastry } from './synastry.js';
 import { computeTransits, PERIOD_KEYS } from './transits.js';
 
@@ -76,7 +76,14 @@ async function handleChart(request, env) {
     // Exact positions need the ephemeris files; the fetch is cached per isolate,
     // so only the first calculation of an isolate pays for it.
     await loadPrecisionFiles(env.ASSETS);
-    const chart = await computeChart({ date, time, timeZone, latitude, longitude });
+    const chart = await computeChart({
+      date,
+      time,
+      timeZone,
+      latitude,
+      longitude,
+      asteroids: body.asteroids === true && isPrecisionReady(),
+    });
     const { western, vedic, ...shared } = chart;
     const selected = system === 'vedic' ? vedic : western;
     const reading = buildReading({
@@ -127,8 +134,13 @@ async function handleSynastry(request, env) {
     const result = await computeSynastry({
       first: { ...firstBirth, ...firstLocation },
       second: { ...secondBirth, ...secondLocation },
+      asteroids: body.asteroids === true && isPrecisionReady(),
     });
-    const reading = buildSynastry({ aspects: result.aspects, truncated: result.truncated });
+    const reading = buildSynastry({
+      aspects: result.aspects,
+      truncated: result.truncated,
+      score: result.score,
+    });
     return json({
       first: { place: firstLocation.place },
       second: { place: secondLocation.place },
@@ -165,8 +177,19 @@ async function handleTransits(request, env) {
 
   try {
     await loadPrecisionFiles(env.ASSETS);
-    const chart = await computeChart({ date, time, timeZone, latitude, longitude });
-    const forecast = await computeTransits({ natalPlanets: chart.western.planets, period });
+    const chart = await computeChart({
+      date,
+      time,
+      timeZone,
+      latitude,
+      longitude,
+      asteroids: body.asteroids === true && isPrecisionReady(),
+    });
+    const forecast = await computeTransits({
+      natalPlanets: chart.western.planets,
+      period,
+      asteroids: body.asteroids === true && isPrecisionReady(),
+    });
     const reading = buildForecast({
       period,
       events: forecast.events,

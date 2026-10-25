@@ -24,6 +24,12 @@ const PLANETS = {
   neptune: 'Нептун — это мечты и туман: где легко потерять границы.',
   pluto: 'Плутон — это сила и контроль: где всё меняется до основания.',
   rahu: 'Раху — это точка, куда тянет, но опыта там пока мало.',
+  chiron: 'Хирон — это больное место и то, чему ты из-за него учишься.',
+  pholus: 'Фолус — это маленькая причина, которая запускает большие события.',
+  ceres: 'Церера — это забота: как ты кормишь, поддерживаешь и что считаешь своим.',
+  pallas: 'Паллада — это ум и стратегия: как ты решаешь задачи и видишь схему.',
+  juno: 'Юнона — это партнёрство: на чём держится союз и где появляется обида.',
+  vesta: 'Веста — это преданность делу и свои границы.',
 };
 
 const HOUSES = {
@@ -165,6 +171,8 @@ const SATURN_IN_SIGN = {
 // more about a generation than about a person. The house is what personalises them.
 const GENERATIONAL = ['uranus', 'neptune', 'pluto', 'rahu'];
 
+const ASTEROID_KEYS = ['chiron', 'pholus', 'ceres', 'pallas', 'juno', 'vesta'];
+
 const GENERATION_NOTE = 'Медленные планеты идут по знаку годами, поэтому их знак — общий с твоим поколением, а личное в них — дом.';
 
 const SIGN_TEXT_BY_PLANET = {
@@ -187,6 +195,12 @@ const PLANET_THEMES = {
   neptune: 'мечты',
   pluto: 'сила',
   rahu: 'тяга к новому',
+  chiron: 'боль и уроки',
+  pholus: 'второй шанс',
+  ceres: 'забота',
+  pallas: 'ум и стратегия',
+  juno: 'партнёрство',
+  vesta: 'преданность делу',
 };
 
 // Planet names plus the cases a sentence may need: "Солнце рядом с Луной".
@@ -202,6 +216,12 @@ const PLANET_CASES = {
   neptune: { possessive: 'Твой', nominative: 'Нептун', genitive: 'Нептуна', dative: 'Нептуну', instrumental: 'Нептуном' },
   pluto: { possessive: 'Твой', nominative: 'Плутон', genitive: 'Плутона', dative: 'Плутону', instrumental: 'Плутоном' },
   rahu: { possessive: 'Твой', nominative: 'Раху', genitive: 'Раху', dative: 'Раху', instrumental: 'Раху' },
+  chiron: { possessive: 'Твой', nominative: 'Хирон', genitive: 'Хирона', dative: 'Хирону', instrumental: 'Хироном' },
+  pholus: { possessive: 'Твой', nominative: 'Фолус', genitive: 'Фолуса', dative: 'Фолусу', instrumental: 'Фолусом' },
+  ceres: { possessive: 'Твоя', nominative: 'Церера', genitive: 'Цереры', dative: 'Церере', instrumental: 'Церерой' },
+  pallas: { possessive: 'Твоя', nominative: 'Паллада', genitive: 'Паллады', dative: 'Палладе', instrumental: 'Палладой' },
+  juno: { possessive: 'Твоя', nominative: 'Юнона', genitive: 'Юноны', dative: 'Юноне', instrumental: 'Юноной' },
+  vesta: { possessive: 'Твоя', nominative: 'Веста', genitive: 'Весты', dative: 'Весте', instrumental: 'Вестой' },
 };
 
 // Transit texts: the moving planet is the event, the natal planet is your own theme.
@@ -216,6 +236,12 @@ const TRANSIT_THEMES = {
   uranus: 'перемены и неожиданности',
   neptune: 'туман и мечты',
   pluto: 'давление и перелом',
+  chiron: 'старые раны и уроки',
+  pholus: 'запущенные перемены',
+  ceres: 'забота и дом',
+  pallas: 'ум и стратегия',
+  juno: 'партнёрство и обиды',
+  vesta: 'дело и границы',
 };
 
 const NATAL_THEMES = {
@@ -230,6 +256,12 @@ const NATAL_THEMES = {
   neptune: ['мечты', 'мечтами'],
   pluto: ['силу', 'силой'],
   rahu: ['тягу к новому', 'тягой к новому'],
+  chiron: ['боль и уроки', 'болью и уроками'],
+  pholus: ['второй шанс', 'вторым шансом'],
+  ceres: ['заботу', 'заботой'],
+  pallas: ['ум и стратегию', 'умом и стратегией'],
+  juno: ['партнёрство', 'партнёрством'],
+  vesta: ['преданность делу', 'преданностью делу'],
 };
 
 const TRANSIT_ASPECTS = {
@@ -249,7 +281,7 @@ const SYNASTRY_ASPECTS = {
   opposition: { label: 'противоположность', term: 'оппозиция', meaning: 'тянут в разные стороны, нужен баланс' },
 };
 
-const SYNASTRY_NOTE = 'Считаются связи личных планет: Солнце, Луна, Меркурий, Венера, Марс. Медленные планеты у ровесников стоят в одних знаках и о совместимости говорят мало.';
+const SYNASTRY_NOTE = 'Процент — условная оценка: баланс спокойных и напряжённых связей личных планет, каждая с поправкой на точность. 50% — поровну; это не измерение и не приговор. Медленные планеты у ровесников стоят в одних знаках и о совместимости говорят мало.';
 
 const PERIOD_TITLES = {
   week: 'Прогноз на неделю',
@@ -283,6 +315,8 @@ const ASPECT_TEXTS = {
   },
 };
 
+const MAX_ASPECTS = 20;
+
 const ASPECTS_NOTE = 'Аспект — угол между планетами; термин в скобках — принятое в астрологии название. Соединение — планеты рядом, секстиль и трин — помогают друг другу, квадрат и оппозиция — тянут в разные стороны. Сверху — самые точные связи.';
 
 const SYSTEM_HOUSE_NOTE = {
@@ -297,11 +331,12 @@ function signName(sign) {
 function planetLine(planet) {
   const house = HOUSES[planet.house] || '';
 
-  if (GENERATIONAL.includes(planet.key)) {
+  const signText = SIGN_TEXT_BY_PLANET[planet.key];
+  if (GENERATIONAL.includes(planet.key) || !signText) {
     return `${PLANETS[planet.key]} У тебя это в знаке ${signName(planet.sign)}. ${house}`.trim();
   }
 
-  return `${PLANETS[planet.key]} ${SIGN_TEXT_BY_PLANET[planet.key][planet.sign]} ${house}`.trim();
+  return `${PLANETS[planet.key]} ${signText[planet.sign]} ${house}`.trim();
 }
 
 function retrogradeNote(planets) {
@@ -328,12 +363,13 @@ function synastryLine(aspect) {
 }
 
 /** Ready-to-render synastry: one dated line is not needed here, the texts are enough. */
-export function buildSynastry({ aspects, truncated }) {
+export function buildSynastry({ aspects, truncated, score }) {
   const items = aspects.map(synastryLine).filter(Boolean);
   return {
     title: 'Совместимость',
     note: truncated ? `${SYNASTRY_NOTE} Показаны 12 самых точных связей.` : SYNASTRY_NOTE,
     items,
+    score,
   };
 }
 
@@ -398,15 +434,24 @@ export function buildReading({ system, planets, ascendantSignIndex, aspects = []
     .filter((planet) => planet.key !== 'sun' && planet.key !== 'moon')
     .map(planetLine);
 
+  const hasAsteroids = planets.some((planet) => ASTEROID_KEYS.includes(planet.key));
+  const asteroidNote = hasAsteroids
+    ? 'Астероиды добавляют оттенки, но главные темы карты читаются по большим планетам.'
+    : '';
+
   sections.push({
     title: 'Остальные планеты',
     items: others,
-    note: [GENERATION_NOTE, retrogradeNote(planets)].filter(Boolean).join(' '),
+    note: [GENERATION_NOTE, asteroidNote, retrogradeNote(planets)].filter(Boolean).join(' '),
   });
 
   const aspectItems = aspects.map(aspectLine).filter(Boolean);
   if (aspectItems.length) {
-    sections.push({ title: 'Связи планет', items: aspectItems, note: ASPECTS_NOTE });
+    const shown = aspectItems.slice(0, MAX_ASPECTS);
+    const note = aspectItems.length > shown.length
+      ? `${ASPECTS_NOTE} Показаны ${MAX_ASPECTS} самых точных связей.`
+      : ASPECTS_NOTE;
+    sections.push({ title: 'Связи планет', items: shown, note });
   }
 
   return { ascendant: { sign: ascSign }, system, sections };

@@ -12,7 +12,7 @@ let precisionReady = false;
 // The full ephemeris derived from JPL DE441, sliced for 1800-2399. Without these
 // files the engine uses its built-in Moshier theory, which differs from DE441 by
 // under an arcsecond but is not the reference itself.
-const PRECISION_FILES = ['sepl_18.se1', 'semo_18.se1'];
+const PRECISION_FILES = ['sepl_18.se1', 'semo_18.se1', 'seas_18.se1'];
 
 export function getEngine() {
   if (!enginePromise) enginePromise = boot();
@@ -49,7 +49,7 @@ export function loadPrecisionFiles(assets) {
         const result = await swe.loadEphemeris(new MemoryEphemeris(files), {
           fromYear: 1800,
           toYear: 2399,
-          kinds: ['planets', 'moon'],
+          kinds: ['planets', 'moon', 'asteroids'],
         });
         precisionReady = result.missing.length === 0 && result.loaded.length > 0;
         return precisionReady;

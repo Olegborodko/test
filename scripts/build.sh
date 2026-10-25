@@ -22,6 +22,7 @@ cp node_modules/@kuntay/swisseph/wasm/swisseph.wasm worker/swisseph.wasm
 mkdir -p dist/public/ephe
 cp node_modules/@kuntay/swisseph-data/ephe/sepl_18.se1 dist/public/ephe/
 cp node_modules/@kuntay/swisseph-data/ephe/semo_18.se1 dist/public/ephe/
+cp node_modules/@kuntay/swisseph-data/ephe/seas_18.se1 dist/public/ephe/
 
 # Bundle Worker + dependencies with wrangler, which knows how to keep a .wasm
 # import as a separate module for the platform.

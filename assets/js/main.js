@@ -25,6 +25,12 @@ const PLANET_NAMES = {
   neptune: 'Нептун',
   pluto: 'Плутон',
   rahu: 'Раху',
+  chiron: 'Хирон',
+  pholus: 'Фолус',
+  ceres: 'Церера',
+  pallas: 'Паллада',
+  juno: 'Юнона',
+  vesta: 'Веста',
 };
 
 // Short labels for the wheel: full names do not fit around a circle on a phone.
@@ -55,6 +61,12 @@ const PLANET_SHORT = {
   neptune: 'Неп',
   pluto: 'Пл',
   rahu: 'Рах',
+  chiron: 'Хир',
+  pholus: 'Фол',
+  ceres: 'Цер',
+  pallas: 'Пал',
+  juno: 'Юно',
+  vesta: 'Вест',
 };
 
 const ERROR_MESSAGES = {
@@ -423,6 +435,9 @@ export function renderSynastry(synastry) {
 
   const header = element('section', 'card');
   header.append(element('h2', null, synastry.reading.title));
+  if (synastry.reading.score) {
+    header.append(element('p', 'score', `${synastry.reading.score.percent}% совпадения`));
+  }
   const places = [synastry.first.place, synastry.second.place]
     .filter(Boolean)
     .map((place) => place.name);
@@ -464,6 +479,7 @@ async function submitChart(event) {
         city: data.get('city'),
         system: data.get('system'),
       };
+  payload.asteroids = data.get('asteroids') === 'on';
   if (mode === 'forecast') payload.period = data.get('period');
 
   const endpoint = { chart: '/api/chart', forecast: '/api/transits', synastry: '/api/synastry' }[mode];

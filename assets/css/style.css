@@ -132,6 +132,10 @@ h2 {
   padding: 0;
 }
 
+.field--choice .field__hint {
+  flex-basis: 100%;
+}
+
 .choice {
   display: flex;
   align-items: center;
@@ -275,6 +279,14 @@ h2 {
   padding: 12px;
   border: 1px solid var(--color-line);
   border-radius: 8px;
+}
+
+.score {
+  margin: 4px 0 8px;
+  font-size: 2.4rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--color-accent);
 }
 
 .forecast {

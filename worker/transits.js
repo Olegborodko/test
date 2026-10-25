@@ -61,8 +61,11 @@ function dateAt(startMs, startJd, jd) {
   return new Date(startMs + (jd - startJd) * DAY_MS).toISOString().slice(0, 10);
 }
 
-export async function computeTransits({ natalPlanets, period = 'month', start = new Date() }) {
+export async function computeTransits({ natalPlanets, period = 'month', start = new Date(), asteroids = false }) {
   const config = PERIODS[period] || PERIODS.month;
+  // Asteroids move fast enough to flood a forecast, except Chiron, which is the
+  // one asteroid astrologers actually follow by transit.
+  const bodies = asteroids ? [...config.bodies, 'chiron'] : config.bodies;
   const { swe, mod } = await getEngine();
 
   const startMs = start.getTime();
@@ -74,7 +77,7 @@ export async function computeTransits({ natalPlanets, period = 'month', start = 
 
   // Longitudes of every transiting body at every sample, computed once.
   const samples = new Map();
-  for (const key of config.bodies) {
+  for (const key of bodies) {
     const body = bodyNumber(mod, key);
     if (body === null) continue;
     const values = [];
