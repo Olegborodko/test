@@ -184,16 +184,14 @@ function signName(sign) {
   return SIGN_NAMES[sign] || sign;
 }
 
-// The sign sentence barely moves with the birth time; the house sentence does.
-// They are returned separately so the clock can mark only the house part.
 function planetLine(planet) {
   const house = HOUSES[planet.house] || '';
 
   if (GENERATIONAL.includes(planet.key)) {
-    return { text: `${PLANETS[planet.key]} У тебя это в знаке ${signName(planet.sign)}.`, house };
+    return `${PLANETS[planet.key]} У тебя это в знаке ${signName(planet.sign)}. ${house}`.trim();
   }
 
-  return { text: `${PLANETS[planet.key]} ${SIGN_TEXT_BY_PLANET[planet.key][planet.sign]}`, house };
+  return `${PLANETS[planet.key]} ${SIGN_TEXT_BY_PLANET[planet.key][planet.sign]} ${house}`.trim();
 }
 
 function retrogradeNote(planets) {
@@ -213,13 +211,12 @@ export function buildReading({ system, planets, ascendantSignIndex }) {
   // timeSensitive marks the parts that move when the birth time is off: the
   // ascendant, the house cusps and the Moon (it walks ~0,5° per hour).
   const sections = [
-    { title: 'Кто ты', text: SUN_IN_SIGN[sun.sign], time: 'stable' },
-    { title: 'Что ты чувствуешь', text: MOON_IN_SIGN[moon.sign], time: 'partial' },
+    { title: 'Кто ты', text: SUN_IN_SIGN[sun.sign] },
+    { title: 'Что ты чувствуешь', text: MOON_IN_SIGN[moon.sign] },
     {
       title: 'Как тебя видят',
       text: ASC_SIGN[ascSign],
       note: `Твой восход — ${signName(ascSign)}. ${SYSTEM_HOUSE_NOTE[system] || ''}`.trim(),
-      time: 'time',
     },
   ];
 
@@ -238,11 +235,7 @@ export function buildReading({ system, planets, ascendantSignIndex }) {
     title: 'Остальные планеты',
     items: others,
     note: [GENERATION_NOTE, retrogradeNote(planets)].filter(Boolean).join(' '),
-    time: 'partial',
   });
 
-  const timeNote =
-    'Если час рождения неверный, меняются только восход и дома: два часа ошибки сдвигают восход на целый знак. Знаки Солнца, Луны и планет остаются те же — Луна уезжает в другой знак только при ошибке в несколько часов.';
-
-  return { ascendant: { sign: ascSign }, system, sections, timeNote };
+  return { ascendant: { sign: ascSign }, system, sections };
 }

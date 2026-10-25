@@ -41,76 +41,6 @@ const status = document.getElementById('status');
 const result = document.getElementById('result');
 const submitButton = form.querySelector('button[type="submit"]');
 
-const SVG_NS = 'http://www.w3.org/2000/svg';
-
-/** Small clock that marks the parts of the reading that depend on the birth time. */
-function clockIcon(label) {
-  const svg = document.createElementNS(SVG_NS, 'svg');
-  svg.setAttribute('viewBox', '0 0 16 16');
-  svg.setAttribute('class', 'icon-clock');
-  svg.setAttribute('role', 'img');
-
-  const title = document.createElementNS(SVG_NS, 'title');
-  title.textContent = label;
-  svg.append(title);
-
-  const dial = document.createElementNS(SVG_NS, 'circle');
-  dial.setAttribute('cx', '8');
-  dial.setAttribute('cy', '8');
-  dial.setAttribute('r', '6.5');
-  dial.setAttribute('fill', 'none');
-  dial.setAttribute('stroke', 'currentColor');
-  dial.setAttribute('stroke-width', '1.6');
-
-  const hands = document.createElementNS(SVG_NS, 'path');
-  hands.setAttribute('d', 'M8 4.4V8.3L10.6 9.8');
-  hands.setAttribute('fill', 'none');
-  hands.setAttribute('stroke', 'currentColor');
-  hands.setAttribute('stroke-width', '1.6');
-  hands.setAttribute('stroke-linecap', 'round');
-  hands.setAttribute('stroke-linejoin', 'round');
-
-  svg.append(dial, hands);
-  return svg;
-}
-
-/** Check mark for the legend, drawn rather than typed so it matches the clock. */
-function checkIcon() {
-  const svg = document.createElementNS(SVG_NS, 'svg');
-  svg.setAttribute('viewBox', '0 0 16 16');
-  svg.setAttribute('class', 'icon-check');
-  svg.setAttribute('aria-hidden', 'true');
-
-  const tick = document.createElementNS(SVG_NS, 'path');
-  tick.setAttribute('d', 'M3.5 8.5L6.5 11.5L12.5 4.5');
-  tick.setAttribute('fill', 'none');
-  tick.setAttribute('stroke', 'currentColor');
-  tick.setAttribute('stroke-width', '1.8');
-  tick.setAttribute('stroke-linecap', 'round');
-  tick.setAttribute('stroke-linejoin', 'round');
-
-  svg.append(tick);
-  return svg;
-}
-
-const TIME_LABELS = {
-  stable: 'время почти не влияет',
-  partial: 'часть зависит от времени',
-  time: 'сдвинется, если время неверное',
-};
-
-/** Explicit badge, so it is obvious which parts move with the birth time. */
-function timeBadge(kind) {
-  const state = TIME_LABELS[kind] ? kind : 'stable';
-  const badge = element('span', state === 'stable' ? 'badge badge--stable' : 'badge badge--time');
-  if (state === 'stable') {
-    badge.append(element('span', null, TIME_LABELS[state]));
-  } else {
-    badge.append(clockIcon('Зависит от времени рождения'), element('span', null, TIME_LABELS[state]));
-  }
-  return badge;
-}
-
 function element(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -150,7 +80,6 @@ function renderWestern(container, western) {
   const card = element('section', 'card');
   card.append(element('h2', null, 'Западная карта'));
   const meta = element('p', 'card__meta', `Тропический зодиак · дома Плацидуса · ASC ${signLabel(signNameOf(western.ascendant))} ${formatDegree(western.ascendant % 30)}`);
-  meta.append(timeBadge('time'));
   card.append(meta);
 
   const rows = western.planets.map((planet) => [
@@ -167,7 +96,6 @@ function renderVedic(container, vedic) {
   const card = element('section', 'card');
   card.append(element('h2', null, 'Ведическая карта'));
   const meta = element('p', 'card__meta', `Сидерический зодиак · аянамша ${vedic.ayanamsa} ${vedic.ayanamsaValue}° · ASC ${signLabel(vedic.ascendantRashi)}`);
-  meta.append(timeBadge('time'));
   card.append(meta);
 
   const rows = vedic.planets.map((planet) => [
@@ -192,42 +120,14 @@ function renderReading(container, reading) {
   card.append(element('h2', null, 'Разбор'));
 
   for (const section of reading.sections) {
-    const title = element('h3', 'reading__title', section.title);
-    title.append(timeBadge(section.time));
-    card.append(title);
+    card.append(element('h3', 'reading__title', section.title));
     if (section.text) card.append(element('p', 'reading__text', section.text));
     if (section.note) card.append(element('p', 'reading__note', section.note));
     if (section.items) {
       const list = element('ul', 'reading__list');
-      for (const item of section.items) {
-        const line = element('li');
-        line.append(element('span', null, item.text));
-        if (item.house) {
-          const houseLine = element('span', 'reading__house', item.house);
-          houseLine.prepend(clockIcon('Дом может измениться, если время неверное'));
-          line.append(houseLine);
-        }
-        list.append(line);
-      }
+      for (const item of section.items) list.append(element('li', null, item));
       card.append(list);
     }
-  }
-
-  if (reading.timeNote) {
-    const note = element('p', 'reading__time');
-    const timeTag = element('span', 'tag tag--time');
-    timeTag.append(clockIcon('Зависит от времени рождения'), element('span', null, 'сдвинется, если время неверное'));
-
-    const stableTag = element('span', 'tag tag--stable');
-    stableTag.append(checkIcon(), element('span', null, 'время почти не влияет'));
-
-    note.append(
-      element('strong', null, 'Как читать значки: '),
-      timeTag,
-      stableTag,
-      element('span', null, reading.timeNote),
-    );
-    card.append(note);
   }
 
   container.append(card);

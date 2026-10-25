@@ -72,86 +72,8 @@ h2 {
   color: var(--color-accent);
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  font-size: 0.68rem;
-  font-weight: 400;
-  line-height: 1.5;
-  border-radius: 999px;
-  border: 1px solid var(--color-line);
-  color: var(--color-muted);
-}
-
-.badge--time {
-  border-color: rgba(139, 123, 255, 0.55);
-  color: #c9c2ff;
-}
-
-.badge .icon-clock {
-  width: 12px;
-  height: 12px;
-  margin: 0;
-}
-
-.card__meta .badge {
-  margin-left: 8px;
-}
-
-.tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-right: 8px;
-  padding: 1px 8px;
-  font-size: 0.72rem;
-  border-radius: 999px;
-  border: 1px solid var(--color-line);
-}
-
-.tag .icon-clock,
-.tag .icon-check {
-  width: 12px;
-  height: 12px;
-  margin: 0;
-}
-
-.tag--time {
-  border-color: rgba(139, 123, 255, 0.55);
-  color: #c9c2ff;
-}
-
-.reading__text {
+.card__meta .reading__text {
   margin: 0 0 4px;
-}
-
-.icon-clock,
-.icon-check {
-  width: 15px;
-  height: 15px;
-  margin-left: 6px;
-  flex: none;
-  color: var(--color-accent);
-  opacity: 0.9;
-}
-
-.icon-check {
-  color: var(--color-muted);
-}
-
-.reading__time {
-  margin: 16px 0 0;
-  padding-top: 12px;
-  font-size: 0.85rem;
-  line-height: 1.7;
-  color: var(--color-muted);
-  border-top: 1px solid var(--color-line);
-}
-
-.reading__time strong {
-  color: var(--color-text);
 }
 
 .reading__note {
@@ -166,19 +88,6 @@ h2 {
   margin: 0;
   padding-left: 18px;
   font-size: 0.95rem;
-}
-
-.reading__house {
-  display: block;
-  margin-top: 2px;
-  color: var(--color-muted);
-}
-
-.reading__house .icon-clock {
-  width: 13px;
-  height: 13px;
-  margin: 0 4px 0 0;
-  vertical-align: -2px;
 }
 
 .form {
