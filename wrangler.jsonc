@@ -1,0 +1,11 @@
+{
+  "name": "astrology-site",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-25",
+  "assets": {
+    "directory": "./dist/public",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+  "rules": [{ "type": "CompiledWasm", "globs": ["**/*.wasm"], "fallthrough": false }]
+}

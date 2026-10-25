@@ -3,11 +3,40 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Привет</title>
+  <title>Натальная карта</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
-  <main>
-    <h1>Привет</h1>
+  <main class="page">
+    <header class="page__header">
+      <h1>Натальная карта</h1>
+      <p class="page__lead">Западная и ведическая карта по дате, времени и месту рождения.</p>
+    </header>
+
+    <form class="form" id="chart-form">
+      <label class="field">
+        <span class="field__label">Дата рождения</span>
+        <input class="field__input" type="date" name="date" required>
+      </label>
+
+      <label class="field">
+        <span class="field__label">Время рождения</span>
+        <input class="field__input" type="time" name="time" value="12:00" required>
+        <span class="field__hint">Если время неизвестно, оставьте 12:00 — дома и Луна будут неточными.</span>
+      </label>
+
+      <label class="field">
+        <span class="field__label">Город рождения</span>
+        <input class="field__input" type="text" name="city" placeholder="Москва" required>
+      </label>
+
+      <button class="button" type="submit">Рассчитать</button>
+      <p class="form__status" id="status" role="status"></p>
+    </form>
+
+    <section class="result" id="result" hidden></section>
   </main>
+
+  <script type="module" src="/assets/js/main.js"></script>
 </body>
 </html>

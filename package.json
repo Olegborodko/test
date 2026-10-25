@@ -1,0 +1,15 @@
+{
+  "name": "astrology-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm run build && wrangler dev --port 3000 --ip 0.0.0.0",
+    "build": "./scripts/build.sh"
+  },
+  "dependencies": {
+    "@kuntay/swisseph": "0.2.2"
+  },
+  "devDependencies": {
+    "wrangler": "4.152.0"
+  }
+}
