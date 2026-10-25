@@ -191,17 +191,17 @@ const PLANET_THEMES = {
 
 // Planet names plus the cases a sentence may need: "Солнце рядом с Луной".
 const PLANET_CASES = {
-  sun: { nominative: 'Солнце', dative: 'Солнцу', instrumental: 'Солнцем' },
-  moon: { nominative: 'Луна', dative: 'Луне', instrumental: 'Луной' },
-  mercury: { nominative: 'Меркурий', dative: 'Меркурию', instrumental: 'Меркурием' },
-  venus: { nominative: 'Венера', dative: 'Венере', instrumental: 'Венерой' },
-  mars: { nominative: 'Марс', dative: 'Марсу', instrumental: 'Марсом' },
-  jupiter: { nominative: 'Юпитер', dative: 'Юпитеру', instrumental: 'Юпитером' },
-  saturn: { nominative: 'Сатурн', dative: 'Сатурну', instrumental: 'Сатурном' },
-  uranus: { nominative: 'Уран', dative: 'Урану', instrumental: 'Ураном' },
-  neptune: { nominative: 'Нептун', dative: 'Нептуну', instrumental: 'Нептуном' },
-  pluto: { nominative: 'Плутон', dative: 'Плутону', instrumental: 'Плутоном' },
-  rahu: { nominative: 'Раху', dative: 'Раху', instrumental: 'Раху' },
+  sun: { nominative: 'Солнце', genitive: 'Солнца', dative: 'Солнцу', instrumental: 'Солнцем' },
+  moon: { nominative: 'Луна', genitive: 'Луны', dative: 'Луне', instrumental: 'Луной' },
+  mercury: { nominative: 'Меркурий', genitive: 'Меркурия', dative: 'Меркурию', instrumental: 'Меркурием' },
+  venus: { nominative: 'Венера', genitive: 'Венеры', dative: 'Венере', instrumental: 'Венерой' },
+  mars: { nominative: 'Марс', genitive: 'Марса', dative: 'Марсу', instrumental: 'Марсом' },
+  jupiter: { nominative: 'Юпитер', genitive: 'Юпитера', dative: 'Юпитеру', instrumental: 'Юпитером' },
+  saturn: { nominative: 'Сатурн', genitive: 'Сатурна', dative: 'Сатурну', instrumental: 'Сатурном' },
+  uranus: { nominative: 'Уран', genitive: 'Урана', dative: 'Урану', instrumental: 'Ураном' },
+  neptune: { nominative: 'Нептун', genitive: 'Нептуна', dative: 'Нептуну', instrumental: 'Нептуном' },
+  pluto: { nominative: 'Плутон', genitive: 'Плутона', dative: 'Плутону', instrumental: 'Плутоном' },
+  rahu: { nominative: 'Раху', genitive: 'Раху', dative: 'Раху', instrumental: 'Раху' },
 };
 
 // Transit texts: the moving planet is the event, the natal planet is your own theme.
@@ -233,11 +233,11 @@ const NATAL_THEMES = {
 };
 
 const TRANSIT_ASPECTS = {
-  conjunction: { phrase: 'в соединении с', nameCase: 'instrumental', verb: 'прямо включают' },
-  sextile: { phrase: 'в секстиле к', nameCase: 'dative', verb: 'мягко поддерживают' },
-  square: { phrase: 'в квадрате к', nameCase: 'dative', verb: 'проверяют на прочность' },
-  trine: { phrase: 'в трине к', nameCase: 'dative', verb: 'поддерживают' },
-  opposition: { phrase: 'в оппозиции к', nameCase: 'dative', verb: 'требуют равновесия с', themeCase: 'ins' },
+  conjunction: { phrase: 'проходит рядом с', nameCase: 'instrumental', term: 'соединение', verb: 'прямо включают' },
+  sextile: { phrase: 'мягко помогает', nameCase: 'dative', term: 'секстиль', verb: 'поддерживают' },
+  square: { phrase: 'спорит с', nameCase: 'instrumental', term: 'квадрат', verb: 'проверяют на прочность' },
+  trine: { phrase: 'ладит с', nameCase: 'instrumental', term: 'трин', verb: 'поддерживают' },
+  opposition: { phrase: 'встаёт напротив', nameCase: 'genitive', term: 'оппозиция', verb: 'требуют равновесия с', themeCase: 'ins' },
 };
 
 const PERIOD_TITLES = {
@@ -246,7 +246,7 @@ const PERIOD_TITLES = {
   year: 'Прогноз на год',
 };
 
-const FORECAST_NOTE = 'Только точные аспекты: медленные планеты — ко всем планетам карты, быстрые — к Солнцу и Луне.';
+const FORECAST_NOTE = 'В списке — точные моменты, когда планета на небе встаёт в аспект к планете твоей карты. Медленные планеты считаются ко всем планетам карты, Солнце, Меркурий, Венера и Марс — только к Солнцу и Луне. Аспект — угол между планетами; в скобках — его название.';
 
 // Plain words first, the astrology term in brackets, so nobody needs to know it.
 const ASPECT_TEXTS = {
@@ -310,7 +310,8 @@ function transitLine(event) {
 
   const themes = NATAL_THEMES[event.natal];
   const theme = aspect.themeCase === 'ins' ? themes[1] : themes[0];
-  return `${transit.nominative} ${aspect.phrase} ${natal[aspect.nameCase]}: ${TRANSIT_THEMES[event.transit]} ${aspect.verb} ${theme}.`;
+  const subject = event.transit === event.natal ? `${transit.nominative} на небе` : transit.nominative;
+  return `${subject} ${aspect.phrase} ${natal[aspect.nameCase]} в карте (${aspect.term}): ${TRANSIT_THEMES[event.transit]} ${aspect.verb} ${theme}.`;
 }
 
 /** Ready-to-render forecast: a title, a note and one dated line per exact transit. */
