@@ -69,6 +69,7 @@ async function handleChart(request) {
       planets: selected.planets,
       ascendantSignIndex: Math.floor(selected.ascendant / 30),
       ascendantLongitude: selected.ascendant,
+      aspects: chart.aspects,
     });
     return json({ place, system, ...shared, [system]: selected, reading });
   } catch (error) {

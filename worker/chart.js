@@ -93,6 +93,43 @@ function houseFromCusps(longitude, cusps) {
   return 12;
 }
 
+// Angular aspect types with the deviation from the exact angle still counted.
+const ASPECTS = [
+  { type: 'conjunction', angle: 0, orb: 8 },
+  { type: 'opposition', angle: 180, orb: 8 },
+  { type: 'trine', angle: 120, orb: 7 },
+  { type: 'square', angle: 90, orb: 7 },
+  { type: 'sextile', angle: 60, orb: 5 },
+];
+
+/** Shortest angular distance between two longitudes, 0-180 degrees. */
+function angularDistance(first, second) {
+  const difference = Math.abs(first - second) % 360;
+  return difference > 180 ? 360 - difference : difference;
+}
+
+/** Major aspects between the planets, the tightest ones first. */
+function computeAspects(planets) {
+  const found = [];
+
+  for (let i = 0; i < planets.length; i += 1) {
+    for (let j = i + 1; j < planets.length; j += 1) {
+      const distance = angularDistance(planets[i].longitude, planets[j].longitude);
+      const aspect = ASPECTS.find((candidate) => Math.abs(distance - candidate.angle) <= candidate.orb);
+      if (!aspect) continue;
+      found.push({
+        from: planets[i].key,
+        to: planets[j].key,
+        type: aspect.type,
+        angle: aspect.angle,
+        orb: round(Math.abs(distance - aspect.angle), 2),
+      });
+    }
+  }
+
+  return found.sort((first, second) => first.orb - second.orb);
+}
+
 function describePosition(position) {
   return {
     sign: position.sign,
@@ -173,6 +210,9 @@ export async function computeChart({ date, time, timeZone, latitude, longitude }
     input: { date, time, timeZone, latitude, longitude },
     utc: utc.toISOString(),
     julianDay: round(jd, 6),
+    // The ayanamsa shifts both longitudes by the same amount, so the angles between
+    // planets, and therefore the aspects, are the same in both zodiacs.
+    aspects: computeAspects(westernPlanets),
     western,
     vedic,
   };

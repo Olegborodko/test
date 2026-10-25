@@ -175,6 +175,60 @@ const SIGN_TEXT_BY_PLANET = {
   saturn: SATURN_IN_SIGN,
 };
 
+const PLANET_THEMES = {
+  sun: 'характер',
+  moon: 'чувства',
+  mercury: 'мысли',
+  venus: 'любовь',
+  mars: 'энергия',
+  jupiter: 'рост',
+  saturn: 'ответственность',
+  uranus: 'свобода',
+  neptune: 'мечты',
+  pluto: 'сила',
+  rahu: 'тяга к новому',
+};
+
+// The case an aspect label needs for each planet: "Трин Венеры к Марсу".
+const PLANET_CASES = {
+  sun: { genitive: 'Солнца', dative: 'Солнцу', instrumental: 'Солнцем' },
+  moon: { genitive: 'Луны', dative: 'Луне', instrumental: 'Луной' },
+  mercury: { genitive: 'Меркурия', dative: 'Меркурию', instrumental: 'Меркурием' },
+  venus: { genitive: 'Венеры', dative: 'Венере', instrumental: 'Венерой' },
+  mars: { genitive: 'Марса', dative: 'Марсу', instrumental: 'Марсом' },
+  jupiter: { genitive: 'Юпитера', dative: 'Юпитеру', instrumental: 'Юпитером' },
+  saturn: { genitive: 'Сатурна', dative: 'Сатурну', instrumental: 'Сатурном' },
+  uranus: { genitive: 'Урана', dative: 'Урану', instrumental: 'Ураном' },
+  neptune: { genitive: 'Нептуна', dative: 'Нептуну', instrumental: 'Нептуном' },
+  pluto: { genitive: 'Плутона', dative: 'Плутону', instrumental: 'Плутоном' },
+  rahu: { genitive: 'Раху', dative: 'Раху', instrumental: 'Раху' },
+};
+
+const ASPECT_TEXTS = {
+  conjunction: {
+    label: (from, to) => `Соединение ${from.genitive} с ${to.instrumental}`,
+    meaning: 'сливаются в одно, и разделить их трудно',
+  },
+  sextile: {
+    label: (from, to) => `Секстиль ${from.genitive} к ${to.dative}`,
+    meaning: 'поддерживают друг друга, если ты сам делаешь шаг',
+  },
+  square: {
+    label: (from, to) => `Квадрат ${from.genitive} к ${to.dative}`,
+    meaning: 'тянут в разные стороны, и это напряжение толкает действовать',
+  },
+  trine: {
+    label: (from, to) => `Трин ${from.genitive} к ${to.dative}`,
+    meaning: 'ладят сами собой, и это твоя сильная сторона',
+  },
+  opposition: {
+    label: (from, to) => `Оппозиция ${from.genitive} и ${to.genitive}`,
+    meaning: 'стоят напротив, и задача — держать равновесие, а не выбирать что-то одно',
+  },
+};
+
+const ASPECTS_NOTE = 'Аспект — угол между планетами: соединение 0°, секстиль 60°, квадрат 90°, трин 120°, оппозиция 180°. Учитываются расхождения до 8°; сверху — самые точные связи.';
+
 const SYSTEM_HOUSE_NOTE = {
   western: 'Дома считаются от восхода по Плацидусу.',
   vedic: 'Дома считаются от восхода по целым знакам.',
@@ -203,7 +257,17 @@ function retrogradeNote(planets) {
   return `Ретроградными в момент рождения были: ${names.join(', ')}. Это не поломка — так бывает у всех; такие темы больше про внутреннее, чем про показное.`;
 }
 
-export function buildReading({ system, planets, ascendantSignIndex }) {
+function aspectLine(aspect) {
+  const text = ASPECT_TEXTS[aspect.type];
+  const from = PLANET_CASES[aspect.from];
+  const to = PLANET_CASES[aspect.to];
+  if (!text || !from || !to) return '';
+  const label = text.label(from, to);
+  const themes = `${PLANET_THEMES[aspect.from]} и ${PLANET_THEMES[aspect.to]}`;
+  return `${label}: ${themes} ${text.meaning}.`;
+}
+
+export function buildReading({ system, planets, ascendantSignIndex, aspects = [] }) {
   const ascSign = SIGNS[ascendantSignIndex];
   const sun = planets.find((planet) => planet.key === 'sun');
   const moon = planets.find((planet) => planet.key === 'moon');
@@ -236,6 +300,11 @@ export function buildReading({ system, planets, ascendantSignIndex }) {
     items: others,
     note: [GENERATION_NOTE, retrogradeNote(planets)].filter(Boolean).join(' '),
   });
+
+  const aspectItems = aspects.map(aspectLine).filter(Boolean);
+  if (aspectItems.length) {
+    sections.push({ title: 'Связи планет', items: aspectItems, note: ASPECTS_NOTE });
+  }
 
   return { ascendant: { sign: ascSign }, system, sections };
 }
