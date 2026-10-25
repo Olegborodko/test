@@ -93,13 +93,20 @@ function checkIcon() {
   return svg;
 }
 
+const TIME_LABELS = {
+  stable: 'время почти не влияет',
+  partial: 'часть зависит от времени',
+  time: 'сдвинется, если время неверное',
+};
+
 /** Explicit badge, so it is obvious which parts move with the birth time. */
-function timeBadge(timeSensitive) {
-  const badge = element('span', timeSensitive ? 'badge badge--time' : 'badge badge--stable');
-  if (timeSensitive) {
-    badge.append(clockIcon('Зависит от времени рождения'), element('span', null, 'сдвинется, если время неверное'));
+function timeBadge(kind) {
+  const state = TIME_LABELS[kind] ? kind : 'stable';
+  const badge = element('span', state === 'stable' ? 'badge badge--stable' : 'badge badge--time');
+  if (state === 'stable') {
+    badge.append(element('span', null, TIME_LABELS[state]));
   } else {
-    badge.append(element('span', null, 'время почти не влияет'));
+    badge.append(clockIcon('Зависит от времени рождения'), element('span', null, TIME_LABELS[state]));
   }
   return badge;
 }
@@ -143,7 +150,7 @@ function renderWestern(container, western) {
   const card = element('section', 'card');
   card.append(element('h2', null, 'Западная карта'));
   const meta = element('p', 'card__meta', `Тропический зодиак · дома Плацидуса · ASC ${signLabel(signNameOf(western.ascendant))} ${formatDegree(western.ascendant % 30)}`);
-  meta.append(timeBadge(true));
+  meta.append(timeBadge('time'));
   card.append(meta);
 
   const rows = western.planets.map((planet) => [
@@ -160,7 +167,7 @@ function renderVedic(container, vedic) {
   const card = element('section', 'card');
   card.append(element('h2', null, 'Ведическая карта'));
   const meta = element('p', 'card__meta', `Сидерический зодиак · аянамша ${vedic.ayanamsa} ${vedic.ayanamsaValue}° · ASC ${signLabel(vedic.ascendantRashi)}`);
-  meta.append(timeBadge(true));
+  meta.append(timeBadge('time'));
   card.append(meta);
 
   const rows = vedic.planets.map((planet) => [
@@ -186,13 +193,22 @@ function renderReading(container, reading) {
 
   for (const section of reading.sections) {
     const title = element('h3', 'reading__title', section.title);
-    title.append(timeBadge(section.timeSensitive));
+    title.append(timeBadge(section.time));
     card.append(title);
     if (section.text) card.append(element('p', 'reading__text', section.text));
     if (section.note) card.append(element('p', 'reading__note', section.note));
     if (section.items) {
       const list = element('ul', 'reading__list');
-      for (const item of section.items) list.append(element('li', null, item));
+      for (const item of section.items) {
+        const line = element('li');
+        line.append(element('span', null, item.text));
+        if (item.house) {
+          const houseLine = element('span', 'reading__house', item.house);
+          houseLine.prepend(clockIcon('Дом может измениться, если время неверное'));
+          line.append(houseLine);
+        }
+        list.append(line);
+      }
       card.append(list);
     }
   }

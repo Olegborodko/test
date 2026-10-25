@@ -168,6 +168,19 @@ h2 {
   font-size: 0.95rem;
 }
 
+.reading__house {
+  display: block;
+  margin-top: 2px;
+  color: var(--color-muted);
+}
+
+.reading__house .icon-clock {
+  width: 13px;
+  height: 13px;
+  margin: 0 4px 0 0;
+  vertical-align: -2px;
+}
+
 .form {
   display: grid;
   gap: var(--space);
