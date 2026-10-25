@@ -41,6 +41,39 @@ const status = document.getElementById('status');
 const result = document.getElementById('result');
 const submitButton = form.querySelector('button[type="submit"]');
 
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+/** Small clock that marks the parts of the reading that depend on the birth time. */
+function clockIcon(label) {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 16 16');
+  svg.setAttribute('class', 'icon-clock');
+  svg.setAttribute('role', 'img');
+
+  const title = document.createElementNS(SVG_NS, 'title');
+  title.textContent = label;
+  svg.append(title);
+
+  const dial = document.createElementNS(SVG_NS, 'circle');
+  dial.setAttribute('cx', '8');
+  dial.setAttribute('cy', '8');
+  dial.setAttribute('r', '6.5');
+  dial.setAttribute('fill', 'none');
+  dial.setAttribute('stroke', 'currentColor');
+  dial.setAttribute('stroke-width', '1.6');
+
+  const hands = document.createElementNS(SVG_NS, 'path');
+  hands.setAttribute('d', 'M8 4.4V8.3L10.6 9.8');
+  hands.setAttribute('fill', 'none');
+  hands.setAttribute('stroke', 'currentColor');
+  hands.setAttribute('stroke-width', '1.6');
+  hands.setAttribute('stroke-linecap', 'round');
+  hands.setAttribute('stroke-linejoin', 'round');
+
+  svg.append(dial, hands);
+  return svg;
+}
+
 function element(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -79,7 +112,9 @@ function signLabel(signName) {
 function renderWestern(container, western) {
   const card = element('section', 'card');
   card.append(element('h2', null, 'Западная карта'));
-  card.append(element('p', 'card__meta', `Тропический зодиак · дома Плацидуса · ASC ${signLabel(signNameOf(western.ascendant))} ${formatDegree(western.ascendant % 30)}`));
+  const meta = element('p', 'card__meta', `Тропический зодиак · дома Плацидуса · ASC ${signLabel(signNameOf(western.ascendant))} ${formatDegree(western.ascendant % 30)}`);
+  meta.append(clockIcon('Восход и дома зависят от времени рождения'));
+  card.append(meta);
 
   const rows = western.planets.map((planet) => [
     PLANET_NAMES[planet.key] || planet.key,
@@ -94,7 +129,9 @@ function renderWestern(container, western) {
 function renderVedic(container, vedic) {
   const card = element('section', 'card');
   card.append(element('h2', null, 'Ведическая карта'));
-  card.append(element('p', 'card__meta', `Сидерический зодиак · аянамша ${vedic.ayanamsa} ${vedic.ayanamsaValue}° · ASC ${signLabel(vedic.ascendantRashi)}`));
+  const meta = element('p', 'card__meta', `Сидерический зодиак · аянамша ${vedic.ayanamsa} ${vedic.ayanamsaValue}° · ASC ${signLabel(vedic.ascendantRashi)}`);
+  meta.append(clockIcon('Восход и дома зависят от времени рождения'));
+  card.append(meta);
 
   const rows = vedic.planets.map((planet) => [
     PLANET_NAMES[planet.key] || planet.key,
@@ -118,7 +155,9 @@ function renderReading(container, reading) {
   card.append(element('h2', null, 'Разбор'));
 
   for (const section of reading.sections) {
-    card.append(element('h3', 'reading__title', section.title));
+    const title = element('h3', 'reading__title', section.title);
+    if (section.timeSensitive) title.append(clockIcon('Зависит от времени рождения'));
+    card.append(title);
     if (section.text) card.append(element('p', 'reading__text', section.text));
     if (section.note) card.append(element('p', 'reading__note', section.note));
     if (section.items) {
@@ -126,6 +165,12 @@ function renderReading(container, reading) {
       for (const item of section.items) list.append(element('li', null, item));
       card.append(list);
     }
+  }
+
+  if (reading.timeNote) {
+    const note = element('p', 'reading__time', reading.timeNote);
+    note.prepend(clockIcon('Зависит от времени рождения'));
+    card.append(note);
   }
 
   container.append(card);

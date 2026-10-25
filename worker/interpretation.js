@@ -208,13 +208,16 @@ export function buildReading({ system, planets, ascendantSignIndex }) {
   const sun = planets.find((planet) => planet.key === 'sun');
   const moon = planets.find((planet) => planet.key === 'moon');
 
+  // timeSensitive marks the parts that move when the birth time is off: the
+  // ascendant, the house cusps and the Moon (it walks ~0,5° per hour).
   const sections = [
-    { title: 'Кто ты', text: SUN_IN_SIGN[sun.sign] },
-    { title: 'Что ты чувствуешь', text: MOON_IN_SIGN[moon.sign] },
+    { title: 'Кто ты', text: SUN_IN_SIGN[sun.sign], timeSensitive: false },
+    { title: 'Что ты чувствуешь', text: MOON_IN_SIGN[moon.sign], timeSensitive: true },
     {
       title: 'Как тебя видят',
       text: ASC_SIGN[ascSign],
       note: `Твой восход — ${signName(ascSign)}. ${SYSTEM_HOUSE_NOTE[system] || ''}`.trim(),
+      timeSensitive: true,
     },
   ];
 
@@ -233,7 +236,10 @@ export function buildReading({ system, planets, ascendantSignIndex }) {
     title: 'Остальные планеты',
     items: others,
     note: [GENERATION_NOTE, retrogradeNote(planets)].filter(Boolean).join(' '),
+    timeSensitive: true,
   });
 
-  return { ascendant: { sign: ascSign }, system, sections };
+  const timeNote = 'Время важно там, где стоит этот значок: восход, дома и Луна. Знаки Солнца и планет почти не зависят от часа рождения.';
+
+  return { ascendant: { sign: ascSign }, system, sections, timeNote };
 }
