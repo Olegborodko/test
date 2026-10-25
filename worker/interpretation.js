@@ -189,45 +189,46 @@ const PLANET_THEMES = {
   rahu: 'тяга к новому',
 };
 
-// The case an aspect label needs for each planet: "Трин Венеры к Марсу".
+// Planet names plus the cases a sentence may need: "Солнце рядом с Луной".
 const PLANET_CASES = {
-  sun: { genitive: 'Солнца', dative: 'Солнцу', instrumental: 'Солнцем' },
-  moon: { genitive: 'Луны', dative: 'Луне', instrumental: 'Луной' },
-  mercury: { genitive: 'Меркурия', dative: 'Меркурию', instrumental: 'Меркурием' },
-  venus: { genitive: 'Венеры', dative: 'Венере', instrumental: 'Венерой' },
-  mars: { genitive: 'Марса', dative: 'Марсу', instrumental: 'Марсом' },
-  jupiter: { genitive: 'Юпитера', dative: 'Юпитеру', instrumental: 'Юпитером' },
-  saturn: { genitive: 'Сатурна', dative: 'Сатурну', instrumental: 'Сатурном' },
-  uranus: { genitive: 'Урана', dative: 'Урану', instrumental: 'Ураном' },
-  neptune: { genitive: 'Нептуна', dative: 'Нептуну', instrumental: 'Нептуном' },
-  pluto: { genitive: 'Плутона', dative: 'Плутону', instrumental: 'Плутоном' },
-  rahu: { genitive: 'Раху', dative: 'Раху', instrumental: 'Раху' },
+  sun: { nominative: 'Солнце', instrumental: 'Солнцем' },
+  moon: { nominative: 'Луна', instrumental: 'Луной' },
+  mercury: { nominative: 'Меркурий', instrumental: 'Меркурием' },
+  venus: { nominative: 'Венера', instrumental: 'Венерой' },
+  mars: { nominative: 'Марс', instrumental: 'Марсом' },
+  jupiter: { nominative: 'Юпитер', instrumental: 'Юпитером' },
+  saturn: { nominative: 'Сатурн', instrumental: 'Сатурном' },
+  uranus: { nominative: 'Уран', instrumental: 'Ураном' },
+  neptune: { nominative: 'Нептун', instrumental: 'Нептуном' },
+  pluto: { nominative: 'Плутон', instrumental: 'Плутоном' },
+  rahu: { nominative: 'Раху', instrumental: 'Раху' },
 };
 
+// Plain words first, the astrology term in brackets, so nobody needs to know it.
 const ASPECT_TEXTS = {
   conjunction: {
-    label: (from, to) => `Соединение ${from.genitive} с ${to.instrumental}`,
+    label: (from, to) => `${from.nominative} рядом с ${to.instrumental} (соединение)`,
     meaning: 'сливаются в одно, и разделить их трудно',
   },
   sextile: {
-    label: (from, to) => `Секстиль ${from.genitive} к ${to.dative}`,
+    label: (from, to) => `${from.nominative} и ${to.nominative} — мягкая связь (секстиль)`,
     meaning: 'поддерживают друг друга, если ты сам делаешь шаг',
   },
   square: {
-    label: (from, to) => `Квадрат ${from.genitive} к ${to.dative}`,
+    label: (from, to) => `${from.nominative} и ${to.nominative} — напряжение (квадрат)`,
     meaning: 'тянут в разные стороны, и это напряжение толкает действовать',
   },
   trine: {
-    label: (from, to) => `Трин ${from.genitive} к ${to.dative}`,
+    label: (from, to) => `${from.nominative} и ${to.nominative} — согласие (трин)`,
     meaning: 'ладят сами собой, и это твоя сильная сторона',
   },
   opposition: {
-    label: (from, to) => `Оппозиция ${from.genitive} и ${to.genitive}`,
+    label: (from, to) => `${from.nominative} и ${to.nominative} — противоположность (оппозиция)`,
     meaning: 'стоят напротив, и задача — держать равновесие, а не выбирать что-то одно',
   },
 };
 
-const ASPECTS_NOTE = 'Аспект — угол между планетами: соединение 0°, секстиль 60°, квадрат 90°, трин 120°, оппозиция 180°. Учитываются расхождения до 8°; сверху — самые точные связи.';
+const ASPECTS_NOTE = 'Аспект — угол между планетами; термин в скобках — принятое в астрологии название. Соединение — планеты рядом, секстиль и трин — помогают друг другу, квадрат и оппозиция — тянут в разные стороны. Сверху — самые точные связи.';
 
 const SYSTEM_HOUSE_NOTE = {
   western: 'Дома считаются от восхода по Плацидусу.',
