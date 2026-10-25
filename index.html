@@ -30,6 +30,18 @@
         <input class="field__input" type="text" name="city" placeholder="Москва" required>
       </label>
 
+      <fieldset class="field field--choice">
+        <legend class="field__label">Какая карта</legend>
+        <label class="choice">
+          <input class="choice__input" type="radio" name="system" value="western" checked>
+          <span>Западная</span>
+        </label>
+        <label class="choice">
+          <input class="choice__input" type="radio" name="system" value="vedic">
+          <span>Ведическая</span>
+        </label>
+      </fieldset>
+
       <button class="button" type="submit">Рассчитать</button>
       <p class="form__status" id="status" role="status"></p>
     </form>

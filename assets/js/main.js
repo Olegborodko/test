@@ -87,6 +87,7 @@ function renderWestern(container, western) {
   ]);
 
   card.append(table(['Планета', 'Положение'], rows));
+  card.append(element('p', 'card__meta', 'ASC — асцендент, MC — середина неба, R — ретроградная планета.'));
   container.append(card);
 }
 
@@ -103,6 +104,7 @@ function renderVedic(container, vedic) {
   ]);
 
   card.append(table(['Планета', 'Раши', 'Накшатра', 'Дом'], rows));
+  card.append(element('p', 'card__meta', 'Дом считается от асцендента по целым знакам, пада — четверть накшатры.'));
   container.append(card);
 }
 
@@ -120,8 +122,8 @@ function render(chart) {
   header.append(element('p', 'card__meta', `Всемирное время: ${chart.utc.replace('T', ' ').slice(0, 16)} · JD ${chart.julianDay}`));
   result.append(header);
 
-  renderWestern(result, chart.western);
-  renderVedic(result, chart.vedic);
+  if (chart.western) renderWestern(result, chart.western);
+  if (chart.vedic) renderVedic(result, chart.vedic);
   result.hidden = false;
 }
 
@@ -136,6 +138,7 @@ form.addEventListener('submit', async (event) => {
     date: data.get('date'),
     time: data.get('time'),
     city: data.get('city'),
+    system: data.get('system'),
   };
 
   try {

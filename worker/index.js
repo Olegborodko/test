@@ -56,9 +56,13 @@ async function handleChart(request) {
   if (Number.isNaN(latitude) || Number.isNaN(longitude)) return json({ error: 'invalid_coordinates' }, 400);
   if (Math.abs(latitude) > 90 || Math.abs(longitude) > 180) return json({ error: 'invalid_coordinates' }, 400);
 
+  // The visitor picks one system before calculating; only that chart is returned.
+  const system = body.system === 'vedic' ? 'vedic' : 'western';
+
   try {
     const chart = await computeChart({ date, time, timeZone, latitude, longitude });
-    return json({ place, ...chart });
+    const { western, vedic, ...shared } = chart;
+    return json({ place, system, ...shared, [system]: system === 'vedic' ? vedic : western });
   } catch (error) {
     return json({ error: 'calculation_failed', message: String(error && error.message) }, 500);
   }

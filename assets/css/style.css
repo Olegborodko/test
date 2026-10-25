@@ -75,6 +75,42 @@ h2 {
   border-radius: 8px;
 }
 
+.field--choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.field--choice .field__label {
+  flex-basis: 100%;
+  padding: 0;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.choice:has(.choice__input:checked) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.choice__input {
+  margin: 0;
+  accent-color: var(--color-accent);
+}
+
 .field__input:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 1px;
